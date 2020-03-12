@@ -5,6 +5,8 @@ from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 
+import pdb
+
 # GINConv model
 class GINConvNet(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
@@ -42,7 +44,8 @@ class GINConvNet(torch.nn.Module):
         # 1D convolution on protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
         self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
-        self.fc1_xt = nn.Linear(32*121, output_dim)
+        # pdb.set_trace()
+        self.fc1_xt = nn.Linear(128 * 1000, output_dim)
 
         # combined layers
         self.fc1 = nn.Linear(256, 1024)
@@ -68,9 +71,11 @@ class GINConvNet(torch.nn.Module):
         x = F.dropout(x, p=0.2, training=self.training)
 
         embedded_xt = self.embedding_xt(target)
-        conv_xt = self.conv_xt_1(embedded_xt)
+        # conv_xt = self.conv_xt_1(embedded_xt)
         # flatten
-        xt = conv_xt.view(-1, 32 * 121)
+        # xt = conv_xt.view(-1, 32 * 121)
+        xt = embedded_xt.view(-1, 1000 * 128)
+        # pdb.set_trace()
         xt = self.fc1_xt(xt)
 
         # concat
