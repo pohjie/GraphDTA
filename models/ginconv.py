@@ -43,7 +43,7 @@ class GINConvNet(torch.nn.Module):
 
         # 1D convolution on protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
-        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
+        # self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
         # pdb.set_trace()
         self.fc1_xt = nn.Linear(128 * 1000, output_dim)
 
