@@ -114,7 +114,7 @@ for smile in compound_iso_smiles:
     g = smile_to_graph(smile)
     smile_graph[smile] = g
 
-datasets = ['davis','kiba','kiba_0005','kiba_001','kiba_0025','kiba_005','kiba_01','kiba_025','kiba_05']
+datasets = ['davis','kiba','kiba_005','kiba_01','kiba_025'] #,'kiba_005','kiba_01','kiba_025','kiba_05']
 # convert to PyTorch data format
 for dataset in datasets:
     processed_data_file_train = 'data/processed/' + dataset + '_train.pt'
