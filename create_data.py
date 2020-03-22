@@ -55,7 +55,7 @@ def seq_cat(prot):
 
 # from DeepDTA data
 all_prots = []
-datasets = ['kiba','davis','kiba_0005','kiba_001','kiba_0025','kiba_005','kiba_01','kiba_025','kiba_05']
+datasets = ['kiba','davis']
 for dataset in datasets:
     print('convert data from DeepDTA for ', dataset)
     fpath = 'data/' + dataset + '/'
@@ -103,7 +103,7 @@ seq_dict_len = len(seq_dict)
 max_seq_len = 1000
 
 compound_iso_smiles = []
-for dt_name in ['kiba','davis','kiba_0005','kiba_001','kiba_0025','kiba_005','kiba_01','kiba_025','kiba_05']:
+for dt_name in ['kiba','davis']:
     opts = ['train','test']
     for opt in opts:
         df = pd.read_csv('data/' + dt_name + '_' + opt + '.csv')
