@@ -9,6 +9,9 @@ from models.gat_gcn import GAT_GCN
 from models.gcn import GCNNet
 from models.ginconv import GINConvNet
 from utils import *
+import time
+
+start_time = time.time()
 
 # training function at each epoch
 def train(model, device, train_loader, optimizer, epoch):
@@ -100,3 +103,4 @@ for dataset in datasets:
             else:
                 print(ret[1],'No improvement since epoch ', best_epoch, '; best_mse,best_ci:', best_mse,best_ci,model_st,dataset)
 
+print("--- %s seconds ---" % (time.time() - start_time))
