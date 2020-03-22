@@ -103,7 +103,7 @@ seq_dict_len = len(seq_dict)
 max_seq_len = 1000
 
 compound_iso_smiles = []
-for dt_name in ['kiba','davis']:
+for dt_name in ['kiba','davis','kiba_005','kiba_01','kiba_025']:
     opts = ['train','test']
     for opt in opts:
         df = pd.read_csv('data/' + dt_name + '_' + opt + '.csv')
