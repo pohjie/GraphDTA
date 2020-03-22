@@ -42,7 +42,7 @@ def predicting(model, device, loader):
     return total_labels.numpy().flatten(),total_preds.numpy().flatten()
 
 
-datasets = [['davis','kiba','kiba_0005','kiba_001','kiba_0025','kiba_005','kiba_01','kiba_025','kiba_05'][int(sys.argv[1])]]
+datasets = [['davis','kiba','kiba_005','kiba_01','kiba_025'][int(sys.argv[1])]]
 modeling = [GINConvNet, GATNet, GAT_GCN, GCNNet][int(sys.argv[2])]
 model_st = modeling.__name__
 
