@@ -28,9 +28,9 @@ def one_of_k_encoding_unk(x, allowable_set):
 
 def smile_to_graph(smile):
     mol = Chem.MolFromSmiles(smile)
-    
+
     c_size = mol.GetNumAtoms()
-    
+
     features = []
     for atom in mol.GetAtoms():
         feature = atom_features(atom)
@@ -43,19 +43,19 @@ def smile_to_graph(smile):
     edge_index = []
     for e1, e2 in g.edges:
         edge_index.append([e1, e2])
-        
+
     return c_size, features, edge_index
 
 def seq_cat(prot):
     x = np.zeros(max_seq_len)
-    for i, ch in enumerate(prot[:max_seq_len]): 
+    for i, ch in enumerate(prot[:max_seq_len]):
         x[i] = seq_dict[ch]
-    return x  
+    return x
 
 
 # from DeepDTA data
 all_prots = []
-datasets = ['kiba','davis']
+datasets = ['kiba','davis','kiba_0005','kiba_001','kiba_0025','kiba_005','kiba_01','kiba_025','kiba_05']
 for dataset in datasets:
     print('convert data from DeepDTA for ', dataset)
     fpath = 'data/' + dataset + '/'
@@ -77,7 +77,7 @@ for dataset in datasets:
     affinity = np.asarray(affinity)
     opts = ['train','test']
     for opt in opts:
-        rows, cols = np.where(np.isnan(affinity)==False)  
+        rows, cols = np.where(np.isnan(affinity)==False)
         if opt=='train':
             rows,cols = rows[train_fold], cols[train_fold]
         elif opt=='test':
@@ -89,21 +89,21 @@ for dataset in datasets:
                 ls += [ drugs[rows[pair_ind]]  ]
                 ls += [ prots[cols[pair_ind]]  ]
                 ls += [ affinity[rows[pair_ind],cols[pair_ind]]  ]
-                f.write(','.join(map(str,ls)) + '\n')       
+                f.write(','.join(map(str,ls)) + '\n')
     print('\ndataset:', dataset)
     print('train_fold:', len(train_fold))
     print('test_fold:', len(valid_fold))
     print('len(set(drugs)),len(set(prots)):', len(set(drugs)),len(set(prots)))
     all_prots += list(set(prots))
-    
-    
+
+
 seq_voc = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
 seq_dict = {v:i for i,v in enumerate(seq_voc)}
 seq_dict_len = len(seq_dict)
 max_seq_len = 1000
 
 compound_iso_smiles = []
-for dt_name in ['kiba','davis']:
+for dt_name in ['kiba','davis','kiba_0005','kiba_001','kiba_0025','kiba_005','kiba_01','kiba_025','kiba_05']:
     opts = ['train','test']
     for opt in opts:
         df = pd.read_csv('data/' + dt_name + '_' + opt + '.csv')
@@ -114,7 +114,7 @@ for smile in compound_iso_smiles:
     g = smile_to_graph(smile)
     smile_graph[smile] = g
 
-datasets = ['davis','kiba']
+datasets = ['davis','kiba','kiba_0005','kiba_001','kiba_0025','kiba_005','kiba_01','kiba_025','kiba_05']
 # convert to PyTorch data format
 for dataset in datasets:
     processed_data_file_train = 'data/processed/' + dataset + '_train.pt'
@@ -134,6 +134,6 @@ for dataset in datasets:
         train_data = TestbedDataset(root='data', dataset=dataset+'_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph)
         print('preparing ', dataset + '_test.pt in pytorch format!')
         test_data = TestbedDataset(root='data', dataset=dataset+'_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph)
-        print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')        
+        print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')
     else:
-        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')        
+        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')
