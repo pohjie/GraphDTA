@@ -9,6 +9,9 @@ from models.gat_gcn import GAT_GCN
 from models.gcn import GCNNet
 from models.ginconv import GINConvNet
 from utils import *
+import time
+
+start_time = time.time()
 
 # training function at each epoch
 def train(model, device, train_loader, optimizer, epoch):
@@ -42,7 +45,7 @@ def predicting(model, device, loader):
     return total_labels.numpy().flatten(),total_preds.numpy().flatten()
 
 
-datasets = [['davis','kiba'][int(sys.argv[1])]] 
+datasets = [['davis','kiba','kiba_small'][int(sys.argv[1])]]
 modeling = [GINConvNet, GATNet, GAT_GCN, GCNNet][int(sys.argv[2])]
 model_st = modeling.__name__
 
@@ -70,7 +73,7 @@ for dataset in datasets:
     else:
         train_data = TestbedDataset(root='data', dataset=dataset+'_train')
         test_data = TestbedDataset(root='data', dataset=dataset+'_test')
-        
+
         # make data PyTorch mini-batch processing ready
         train_loader = DataLoader(train_data, batch_size=TRAIN_BATCH_SIZE, shuffle=True)
         test_loader = DataLoader(test_data, batch_size=TEST_BATCH_SIZE, shuffle=False)
@@ -89,6 +92,8 @@ for dataset in datasets:
             train(model, device, train_loader, optimizer, epoch+1)
             G,P = predicting(model, device, test_loader)
             ret = [rmse(G,P),mse(G,P),pearson(G,P),spearman(G,P),ci(G,P)]
+            if epoch == NUM_EPOCHS - 1:
+                print('mse here is: ', ret[1], '; ci here is: ', ret[-1])
             if ret[1]<best_mse:
                 torch.save(model.state_dict(), model_file_name)
                 with open(result_file_name,'w') as f:
@@ -100,3 +105,4 @@ for dataset in datasets:
             else:
                 print(ret[1],'No improvement since epoch ', best_epoch, '; best_mse,best_ci:', best_mse,best_ci,model_st,dataset)
 
+print('time needed is: ', time.time()-start_time, ' seconds')
