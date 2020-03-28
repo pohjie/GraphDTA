@@ -9,7 +9,11 @@ from models.gat_gcn import GAT_GCN
 from models.gcn import GCNNet
 from models.ginconv import GINConvNet
 from models.ginlstm import GINLSTM
+<<<<<<< HEAD
 from models.ginprotemb import GINProtEmb
+=======
+from models.directemb import DirectEmb
+>>>>>>> 98150cc44e452a9413235aef99bb955fd664e585
 from utils import *
 import time
 
