@@ -9,6 +9,7 @@ from models.gat_gcn import GAT_GCN
 from models.gcn import GCNNet
 from models.ginconv import GINConvNet
 from models.ginlstm import GINLSTM
+from models.directemb import DirectEmb
 from utils import *
 import time
 
@@ -47,7 +48,7 @@ def predicting(model, device, loader):
 
 
 datasets = [['davis','kiba','kiba_small'][int(sys.argv[1])]]
-modeling = [GINConvNet, GATNet, GAT_GCN, GCNNet, GINLSTM][int(sys.argv[2])]
+modeling = [GINConvNet, GATNet, GAT_GCN, GCNNet, GINLSTM, DirectEmb][int(sys.argv[2])]
 model_st = modeling.__name__
 
 cuda_name = "cuda:0"
