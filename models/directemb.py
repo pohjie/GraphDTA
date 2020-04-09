@@ -8,11 +8,11 @@ from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 import pdb
 
 # GINConv model
-class GINLSTM(torch.nn.Module):
+class DirectEmb(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
                  n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
 
-        super(GINLSTM, self).__init__()
+        super(DirectEmb, self).__init__()
 
         dim = 32
         self.dropout = nn.Dropout(dropout)
@@ -41,14 +41,9 @@ class GINLSTM(torch.nn.Module):
 
         self.fc1_xd = Linear(dim, output_dim)
 
-        hidden_dim = 40
-        # 1D convolution on protein sequence
+        # direct embedding for protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
-        # randomly setting hidden dimensions
-        self.lstm_xt_1 = nn.LSTM(embed_dim * 1000, hidden_dim)
-        # self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
-        # pdb.set_trace()
-        self.fc1_xt = nn.Linear(hidden_dim, output_dim)
+        self.fc1_xt = nn.Linear(128 * 1000, output_dim)
 
         # combined layers
         self.fc1 = nn.Linear(256, 1024)
@@ -59,6 +54,7 @@ class GINLSTM(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         target = data.target
 
+        pdb.set_trace()
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
         x = F.relu(self.conv2(x, edge_index))
@@ -74,9 +70,8 @@ class GINLSTM(torch.nn.Module):
         x = F.dropout(x, p=0.2, training=self.training)
 
         embedded_xt = self.embedding_xt(target)
-        lstm_xt, _ = self.lstm_xt_1(embedded_xt.view(embedded_xt.shape[0],1,-1))
         # flatten
-        xt = lstm_xt.view(lstm_xt.shape[0],-1)
+        xt = embedded_xt.view(-1, 1000 * 128)
         xt = self.fc1_xt(xt)
 
         # concat
