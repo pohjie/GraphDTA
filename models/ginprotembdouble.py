@@ -39,7 +39,7 @@ class GINProtEmbDouble(torch.nn.Module):
         self.conv5 = GINConv(nn5)
         self.bn5 = torch.nn.BatchNorm1d(dim)
 
-        nn6 = Sequential(Linear(num_features_xd, dim), ReLU(), Linear(dim, dim))
+        nn6 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
         self.conv6 = GINConv(nn6)
         self.bn6 = torch.nn.BatchNorm1d(dim)
 
