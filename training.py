@@ -10,7 +10,7 @@ from models.gcn import GCNNet
 from models.ginconv import GINConvNet
 from models.ginlstm import GINLSTM
 from models.ginprotemb import GINProtEmb
-from models.ginprotemb import GinProtEmbDouble
+from models.ginprotembdouble import GINProtEmbDouble
 from models.directemb import DirectEmb
 from utils import *
 import time
