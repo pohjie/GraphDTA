@@ -12,7 +12,7 @@ class GINProtEmbDouble(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
                  n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
 
-        super(GINProtEmb, self).__init__()
+        super(GINProtEmbDouble, self).__init__()
 
         dim = 32
         self.dropout = nn.Dropout(dropout)
