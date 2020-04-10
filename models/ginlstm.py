@@ -41,7 +41,7 @@ class GINLSTM(torch.nn.Module):
 
         self.fc1_xd = Linear(dim, output_dim)
 
-        hidden_dim = 40
+        hidden_dim = 75
         # 1D convolution on protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
         # randomly setting hidden dimensions

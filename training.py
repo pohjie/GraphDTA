@@ -95,8 +95,7 @@ for dataset in datasets:
             train(model, device, train_loader, optimizer, epoch+1)
             G,P = predicting(model, device, test_loader)
             ret = [rmse(G,P),mse(G,P),pearson(G,P),spearman(G,P),ci(G,P)]
-            if epoch == NUM_EPOCHS - 1:
-                print('mse here is: ', ret[1], '; ci here is: ', ret[-1])
+            print('mse here is: ', ret[1], '; ci here is: ', ret[-1])
             if ret[1]<best_mse:
                 torch.save(model.state_dict(), model_file_name)
                 with open(result_file_name,'w') as f:
