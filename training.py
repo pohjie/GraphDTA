@@ -15,7 +15,7 @@ from models.directemb import DirectEmb
 from utils import *
 import time
 
-import pbd
+import pdb
 
 start_time = time.time()
 
@@ -38,17 +38,33 @@ def train(model, device, train_loader, optimizer, epoch):
                                                                            loss.item()))
 
 def predicting(model, device, loader):
+    now = time.time()
     model.eval()
+    print('model.eval(): ', time.time()-now)
+    now = time.time()
     total_preds = torch.Tensor()
     total_labels = torch.Tensor()
+    print('preds and labels to Tensor: ', time.time()-now)
+    now = time.time()
     print('Make prediction for {} samples...'.format(len(loader.dataset)))
+    print('Make prediction statement: ', time.time()-now)
+    now = time.time()
     with torch.no_grad():
+        count = 0
         for data in loader:
-        	pdb.set_trace()
             data = data.to(device)
+            print('data to device: ', time.time()-now)
+            now = time.time()
             output = model(data)
+            print('output time: ', time.time()-now)
+            now = time.time()
             total_preds = torch.cat((total_preds, output.cpu()), 0)
+            print('total_preds time: ', time.time()-now)
+            now = time.time()
             total_labels = torch.cat((total_labels, data.y.view(-1, 1).cpu()), 0)
+            print('total_labels time: ', time.time()-now)
+            count += 1
+        print('count is: ', count)
     return total_labels.numpy().flatten(),total_preds.numpy().flatten()
 
 
