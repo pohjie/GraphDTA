@@ -15,6 +15,8 @@ from models.directemb import DirectEmb
 from utils import *
 import time
 
+import pbd
+
 start_time = time.time()
 
 # training function at each epoch
@@ -42,6 +44,7 @@ def predicting(model, device, loader):
     print('Make prediction for {} samples...'.format(len(loader.dataset)))
     with torch.no_grad():
         for data in loader:
+        	pdb.set_trace()
             data = data.to(device)
             output = model(data)
             total_preds = torch.cat((total_preds, output.cpu()), 0)
