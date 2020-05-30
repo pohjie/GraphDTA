@@ -15,6 +15,8 @@ from models.directemb import DirectEmb
 from utils import *
 import time
 
+import pdb
+
 start_time = time.time()
 
 # training function at each epoch

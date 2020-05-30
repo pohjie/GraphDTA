@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from lifelines.utils import concordance_index
 from math import sqrt
 from scipy import stats
 from torch_geometric.data import InMemoryDataset, DataLoader
@@ -7,7 +8,7 @@ from torch_geometric import data as DATA
 import torch
 
 class TestbedDataset(InMemoryDataset):
-    def __init__(self, root='/tmp', dataset='davis', 
+    def __init__(self, root='/tmp', dataset='davis',
                  xd=None, xt=None, y=None, transform=None,
                  pre_transform=None,smile_graph=None):
 
@@ -91,24 +92,4 @@ def spearman(y,f):
     rs = stats.spearmanr(y, f)[0]
     return rs
 def ci(y,f):
-    ind = np.argsort(y)
-    y = y[ind]
-    f = f[ind]
-    i = len(y)-1
-    j = i-1
-    z = 0.0
-    S = 0.0
-    while i > 0:
-        while j >= 0:
-            if y[i] > y[j]:
-                z = z+1
-                u = f[i] - f[j]
-                if u > 0:
-                    S = S + 1
-                elif u == 0:
-                    S = S + 0.5
-            j = j - 1
-        i = i - 1
-        j = i-1
-    ci = S/z
-    return ci
+    return concordance_index(y, f)
