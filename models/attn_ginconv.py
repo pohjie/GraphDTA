@@ -40,18 +40,15 @@ class AttnGINConvNet(torch.nn.Module):
         self.conv5 = GINConv(nn5)
         self.bn5 = torch.nn.BatchNorm1d(dim)
 
-        pdb.set_trace()
         # Insert in attention mechanism here
-        # Feed in output of self.bn5 into the attention mechanism, 
-        # which will compute key, value pairs
+        # Feed in output of self.bn5 into the attention mechanism, which will compute key, value pairs
+        self.attention = Attention(32)
+
         self.fc1_xd = Linear(dim, output_dim)
 
         # 1D convolution on protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
         self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
-
-        pdb.set_trace()
-
         self.fc1_xt = nn.Linear(32*121, output_dim)
 
         # combined layers
@@ -73,15 +70,22 @@ class AttnGINConvNet(torch.nn.Module):
         x = self.bn4(x)
         x = F.relu(self.conv5(x, edge_index))
         x = self.bn5(x)
+
+        embedded_xt = self.embedding_xt(target)
+        conv_xt = self.conv_xt_1(embedded_xt)
+
+        # attention
+        o, w = self.attention(conv_xt, x) # query, context
+
+        # flatten
+        xt = conv_xt.view(-1, 32 * 121)
+        xt = self.fc1_xt(xt)
+
+        # carry on with x
         x = global_add_pool(x, batch)
         x = F.relu(self.fc1_xd(x))
         x = F.dropout(x, p=0.2, training=self.training)
 
-        embedded_xt = self.embedding_xt(target)
-        conv_xt = self.conv_xt_1(embedded_xt)
-        # flatten
-        xt = conv_xt.view(-1, 32 * 121)
-        xt = self.fc1_xt(xt)
 
         # concat
         xc = torch.cat((x, xt), 1)
