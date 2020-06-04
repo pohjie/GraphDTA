@@ -12,6 +12,7 @@ from models.ginlstm import GINLSTM
 from models.ginprotemb import GINProtEmb
 from models.ginprotembdouble import GINProtEmbDouble
 from models.directemb import DirectEmb
+from models.attn_ginconv import AttnGINConvNet
 from utils import *
 import time
 
