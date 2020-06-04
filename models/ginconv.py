@@ -36,12 +36,12 @@ class GINConvNet(torch.nn.Module):
         nn5 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
         self.conv5 = GINConv(nn5)
         self.bn5 = torch.nn.BatchNorm1d(dim)
-
         self.fc1_xd = Linear(dim, output_dim)
 
         # 1D convolution on protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
         self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
+
         self.fc1_xt = nn.Linear(32*121, output_dim)
 
         # combined layers
