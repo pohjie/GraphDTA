@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
-import torchnlp.nn.attention as Attention
+import torchnlp.nn.attention as A
 
 import pdb
 
@@ -42,7 +42,7 @@ class AttnGINConvNet(torch.nn.Module):
 
         # Insert in attention mechanism here
         # Feed in output of self.bn5 into the attention mechanism, which will compute key, value pairs
-        self.attention = Attention(32)
+        self.attention = A.Attention(32)
 
         self.fc1_xd = Linear(dim, output_dim)
 
@@ -75,6 +75,7 @@ class AttnGINConvNet(torch.nn.Module):
         conv_xt = self.conv_xt_1(embedded_xt)
 
         # attention
+        pdb.set_trace()
         o, w = self.attention(conv_xt, x) # query, context
 
         # flatten
