@@ -48,7 +48,7 @@ class AttnGINConvNet(torch.nn.Module):
 
         # 1D convolution on protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
-        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8, padding=4)
+        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=9, padding=4)
         self.fc1_xt = nn.Linear(32*121, output_dim)
 
         # combined layers
@@ -60,8 +60,12 @@ class AttnGINConvNet(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         target = data.target
 
+        print('no GCN yet')
+        pdb.set_trace()
+
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
+        pdb.set_trace()
         x = F.relu(self.conv2(x, edge_index))
         x = self.bn2(x)
         x = F.relu(self.conv3(x, edge_index))
