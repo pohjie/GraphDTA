@@ -60,12 +60,10 @@ class AttnGINConvNet(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         target = data.target
 
-        print('no GCN yet')
         pdb.set_trace()
 
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
-        pdb.set_trace()
         x = F.relu(self.conv2(x, edge_index))
         x = self.bn2(x)
         x = F.relu(self.conv3(x, edge_index))
