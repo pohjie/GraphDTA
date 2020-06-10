@@ -42,7 +42,7 @@ class AttnGINConvNet(torch.nn.Module):
 
         # Insert in attention mechanism here
         # Feed in output of self.bn5 into the attention mechanism, which will compute key, value pairs
-        self.attention = A.Attention(32)
+        self.attention = A.Attention(dim)
 
         self.fc1_xd = Linear(dim, output_dim)
 
@@ -59,8 +59,6 @@ class AttnGINConvNet(torch.nn.Module):
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         target = data.target
-
-        pdb.set_trace()
 
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
@@ -87,12 +85,12 @@ class AttnGINConvNet(torch.nn.Module):
         count = [0] * batch_size
         for i in range(batch.shape[0]):
             idx = batch[i].item()
-            2nd_dim = count[idx]
-            x_reshaped[idx, 2nd_dim, :] = x[i]
+            sec_dim = count[idx]
+            x_reshaped[idx, sec_dim, :] = x[i]
             count[idx] += 1
 
+        o, w = self.attention(conv_xt, x_reshaped.float()) # query, context
         pdb.set_trace()
-        o, w = self.attention(conv_xt, x) # query, context
 
         # flatten
         xt = conv_xt.view(-1, 32 * 121)
