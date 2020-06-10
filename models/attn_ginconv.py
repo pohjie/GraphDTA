@@ -77,6 +77,20 @@ class AttnGINConvNet(torch.nn.Module):
         conv_xt = self.conv_xt_1(embedded_xt)
 
         # attention
+        # reshape x into appropriate dim
+        batch_size = target.shape[0]
+        v, i = torch.mode(batch)
+        v_freq = batch.eq(v.item()).sum().item()
+        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]], dtype=torch.float64, device=x.get_device())
+
+        # create a count for the 2nd dim
+        count = [0] * batch_size
+        for i in range(batch.shape[0]):
+            idx = batch[i].item()
+            2nd_dim = count[idx]
+            x_reshaped[idx, 2nd_dim, :] = x[i]
+            count[idx] += 1
+
         pdb.set_trace()
         o, w = self.attention(conv_xt, x) # query, context
 
