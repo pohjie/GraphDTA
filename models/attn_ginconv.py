@@ -15,7 +15,7 @@ class AttnGINConvNet(torch.nn.Module):
 
         super(AttnGINConvNet, self).__init__()
 
-        dim = 128
+        dim = 121
         self.dropout = nn.Dropout(dropout)
         self.relu = nn.ReLU()
         self.n_output = n_output
@@ -48,7 +48,7 @@ class AttnGINConvNet(torch.nn.Module):
 
         # 1D convolution on protein sequence
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
-        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=9, padding=4)
+        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
         self.fc1_xt = nn.Linear(32*121, output_dim)
 
         # combined layers
@@ -98,7 +98,7 @@ class AttnGINConvNet(torch.nn.Module):
         x = F.dropout(x, p=0.2, training=self.training)
 
         # flatten
-        xt = output.view(-1, 32 * 128)
+        xt = output.view(-1, 32 * 121)
         xt = self.fc1_xt(xt)
 
         # concat
