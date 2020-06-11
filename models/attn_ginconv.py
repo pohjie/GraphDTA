@@ -74,8 +74,8 @@ class AttnGINConvNet(torch.nn.Module):
         embedded_xt = self.embedding_xt(target)
         conv_xt = self.conv_xt_1(embedded_xt)
 
-        # attention
-        # reshape x into appropriate dim
+        # attention mechanism
+        # reshape x (drug) into appropriate dim
         batch_size = target.shape[0]
         v, i = torch.mode(batch)
         v_freq = batch.eq(v.item()).sum().item()
@@ -89,18 +89,17 @@ class AttnGINConvNet(torch.nn.Module):
             x_reshaped[idx, sec_dim, :] = x[i]
             count[idx] += 1
 
-        o, w = self.attention(conv_xt, x_reshaped.float()) # query, context
+        output, weights = self.attention(conv_xt, x_reshaped.float()) # query, context
         pdb.set_trace()
 
-        # flatten
-        xt = conv_xt.view(-1, 32 * 121)
-        xt = self.fc1_xt(xt)
-
-        # carry on with x
+        # carry on with x (drug)
         x = global_add_pool(x, batch)
         x = F.relu(self.fc1_xd(x))
         x = F.dropout(x, p=0.2, training=self.training)
 
+        # flatten
+        xt = output.view(-1, 32 * 128)
+        xt = self.fc1_xt(xt)
 
         # concat
         xc = torch.cat((x, xt), 1)
