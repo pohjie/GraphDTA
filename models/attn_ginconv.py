@@ -90,7 +90,6 @@ class AttnGINConvNet(torch.nn.Module):
             count[idx] += 1
 
         output, weights = self.attention(conv_xt, x_reshaped.float()) # query, context
-        pdb.set_trace()
 
         # carry on with x (drug)
         x = global_add_pool(x, batch)
