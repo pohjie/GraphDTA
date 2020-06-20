@@ -97,15 +97,12 @@ class AttnGINConvNet(torch.nn.Module):
                                     dtype=torch.float64)
 
         # create a count for the 2nd dim
-        now_time = time.time()
         device = x.get_device()
         x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(), 
                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
-        print('reshaping takes: ', time.time()-now_time)
         
         now_time = time.time()
         output, weights = self.attention(conv_xt, x_reshaped.float()) # query, context
-        print('feeding through attention mechanism takes: ', time.time()- now_time)
 
         # carry on with x (drug)
         x = global_add_pool(x, batch)
