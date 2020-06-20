@@ -100,14 +100,14 @@ for dataset in datasets:
             G,P = predicting(model, device, test_loader)
             ret = [rmse(G,P),mse(G,P),pearson(G,P),spearman(G,P),ci(G,P)]
             print('mse here is: ', ret[1], '; ci here is: ', ret[-1])
-            if ret[1]<best_mse:
+            if ret[-1]<best_ci:
                 torch.save(model.state_dict(), model_file_name)
                 with open(result_file_name,'w') as f:
                     f.write(','.join(map(str,ret)))
                 best_epoch = epoch+1
                 best_mse = ret[1]
                 best_ci = ret[-1]
-                print('rmse improved at epoch ', best_epoch, '; best_mse,best_ci:', best_mse,best_ci,model_st,dataset)
+                print('ci improved at epoch ', best_epoch, '; best_mse,best_ci:', best_mse,best_ci,model_st,dataset)
             else:
                 print(ret[1],'No improvement since epoch ', best_epoch, '; best_mse,best_ci:', best_mse,best_ci,model_st,dataset)
 

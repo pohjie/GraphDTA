@@ -7,6 +7,7 @@ from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 import torchnlp.nn.attention as A
 
 import pdb
+import time
 
 # GINConv model
 class AttnGINConvNet(torch.nn.Module):
@@ -40,9 +41,8 @@ class AttnGINConvNet(torch.nn.Module):
         self.conv5 = GINConv(nn5)
         self.bn5 = torch.nn.BatchNorm1d(dim)
 
-        # Insert in attention mechanism here
         # Feed in output of self.bn5 into the attention mechanism, which will compute key, value pairs
-        self.attention = A.Attention(dim, attention_type='dot')
+        self.attention = A.Attention(dim)
 
         self.fc1_xd = Linear(dim, output_dim)
 
@@ -82,14 +82,18 @@ class AttnGINConvNet(torch.nn.Module):
         x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]], dtype=torch.float64, device=x.get_device())
 
         # create a count for the 2nd dim
+        now_time = time.time()
         count = [0] * batch_size
         for i in range(batch.shape[0]):
             idx = batch[i].item()
             sec_dim = count[idx]
             x_reshaped[idx, sec_dim, :] = x[i]
             count[idx] += 1
+        print('reshaping takes: ', time.time()-now_time)
+        now_time = time.time()
 
         output, weights = self.attention(conv_xt, x_reshaped.float()) # query, context
+        print('feeding through attention mechanism takes: ', time.time()- now_time)
 
         # carry on with x (drug)
         x = global_add_pool(x, batch)
