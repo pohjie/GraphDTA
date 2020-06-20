@@ -56,7 +56,7 @@ class AttnGINConvNet(torch.nn.Module):
         self.bn5 = torch.nn.BatchNorm1d(dim)
 
         # Feed in output of self.bn5 into the attention mechanism, which will compute key, value pairs
-        self.attention = A.Attention(dim)
+        self.attention = A.Attention(dim, attention_type='dot')
 
         self.fc1_xd = Linear(dim, output_dim)
 
