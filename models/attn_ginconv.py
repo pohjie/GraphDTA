@@ -14,7 +14,14 @@ import time
 
 @jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
 def fast_reshape(batch, x, x_reshaped):
-    pdb.set_trace()
+    count = np.zeros(x_reshaped.shape[0], dtype=np.int8)
+    for i in range(batch.shape[0]):
+        idx = batch[i]
+        sec_dim = count[idx]
+        x_reshaped[idx, sec_dim, :] = x[i]
+        count[idx] += 1
+
+    return x_reshaped
 
 # GINConv model
 class AttnGINConvNet(torch.nn.Module):
@@ -87,21 +94,16 @@ class AttnGINConvNet(torch.nn.Module):
         v, i = torch.mode(batch)
         v_freq = batch.eq(v.item()).sum().item()
         x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]], 
-                                    dtype=torch.float64, device=x.get_device())
+                                    dtype=torch.float64)
 
         # create a count for the 2nd dim
         now_time = time.time()
-        fast_reshape(batch.cpu().numpy(), 
-                     x.cpu().detach().numpy(), x_reshaped.cpu().numpy())
-        count = [0] * batch_size
-        for i in range(batch.shape[0]):
-            idx = batch[i].item()
-            sec_dim = count[idx]
-            x_reshaped[idx, sec_dim, :] = x[i]
-            count[idx] += 1
+        device = x.get_device()
+        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(), 
+                     x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
         print('reshaping takes: ', time.time()-now_time)
+        
         now_time = time.time()
-
         output, weights = self.attention(conv_xt, x_reshaped.float()) # query, context
         print('feeding through attention mechanism takes: ', time.time()- now_time)
 
