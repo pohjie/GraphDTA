@@ -56,7 +56,7 @@ class AttnGINConvNet(torch.nn.Module):
         self.bn5 = torch.nn.BatchNorm1d(dim)
 
         # Feed in output of self.bn5 into the attention mechanism, which will compute key, value pairs
-        self.attention = A.Attention(dim)
+        self.attention = A.Attention(dim, attention_type='dot')
 
         self.fc1_xd = Linear(dim, output_dim)
 
@@ -93,14 +93,14 @@ class AttnGINConvNet(torch.nn.Module):
         batch_size = target.shape[0]
         v, i = torch.mode(batch)
         v_freq = batch.eq(v.item()).sum().item()
-        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]], 
+        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]],
                                     dtype=torch.float64)
 
         # create a count for the 2nd dim
         device = x.get_device()
-        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(), 
+        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
-        
+
         now_time = time.time()
         output, weights = self.attention(conv_xt, x_reshaped.float()) # query, context
 
