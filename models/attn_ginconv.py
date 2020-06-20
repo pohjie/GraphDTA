@@ -6,8 +6,15 @@ from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 import torchnlp.nn.attention as A
 
+from numba import jit
+import numpy as np
+
 import pdb
 import time
+
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def fast_reshape(batch, x, x_reshaped):
+    pdb.set_trace()
 
 # GINConv model
 class AttnGINConvNet(torch.nn.Module):
@@ -79,7 +86,8 @@ class AttnGINConvNet(torch.nn.Module):
         batch_size = target.shape[0]
         v, i = torch.mode(batch)
         v_freq = batch.eq(v.item()).sum().item()
-        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]], dtype=torch.float64, device=x.get_device())
+        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]], 
+                                    dtype=torch.float64, device=x.get_device())
 
         # create a count for the 2nd dim
         now_time = time.time()
