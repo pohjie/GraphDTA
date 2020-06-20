@@ -24,11 +24,11 @@ def fast_reshape(batch, x, x_reshaped):
     return x_reshaped
 
 # GINConv model
-class AttnGINConvNet(torch.nn.Module):
+class AttnDotGINConvNet(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
                  n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
 
-        super(AttnGINConvNet, self).__init__()
+        super(AttnDotGINConvNet, self).__init__()
 
         dim = 121
         self.dropout = nn.Dropout(dropout)
