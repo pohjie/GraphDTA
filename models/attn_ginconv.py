@@ -91,6 +91,8 @@ class AttnGINConvNet(torch.nn.Module):
 
         # create a count for the 2nd dim
         now_time = time.time()
+        fast_reshape(batch.cpu().numpy(), 
+                     x.cpu().detach().numpy(), x_reshaped.cpu().numpy())
         count = [0] * batch_size
         for i in range(batch.shape[0]):
             idx = batch[i].item()
