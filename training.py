@@ -14,8 +14,7 @@ from models.ginprotembdouble import GINProtEmbDouble
 from models.directemb import DirectEmb
 from models.attn_ginconv import AttnGINConvNet
 from models.attn_ginconv_dot import AttnDotGINConvNet
-from models.tattn_ginconv import TwoAttnGINConvNet
-from models.tattn_ginconv_dot import TwoAttnDotGINConvNet
+from models.two_attn_ginconv import TwoAttnGINConvNet
 from utils import *
 import time
 
@@ -56,7 +55,7 @@ def predicting(model, device, loader):
 
 
 datasets = [['davis','kiba','kiba_small'][int(sys.argv[1])]]
-modeling = [AttnGINConvNet, AttnDotGINConvNet, TwoAttnGINConvNet, TwoAttnDotGINConvNet, GINConvNet, GATNet, GAT_GCN, GCNNet, GINProtEmb][int(sys.argv[2])]
+modeling = [AttnGINConvNet, AttnDotGINConvNet, TwoAttnGINConvNet, GINConvNet, GATNet, GAT_GCN, GCNNet, GINProtEmb][int(sys.argv[2])]
 model_st = modeling.__name__
 
 cuda_name = "cuda:0"

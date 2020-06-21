@@ -24,11 +24,11 @@ def fast_reshape(batch, x, x_reshaped):
     return x_reshaped
 
 # GINConv model
-class AttnGINConvNet(torch.nn.Module):
+class TwoAttnGINConvNet(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
                  n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
 
-        super(AttnGINConvNet, self).__init__()
+        super(TwoAttnGINConvNet, self).__init__()
 
         dim = 121
         self.dropout = nn.Dropout(dropout)
@@ -60,7 +60,7 @@ class AttnGINConvNet(torch.nn.Module):
         self.conv5 = GINConv(nn5)
         self.bn5 = torch.nn.BatchNorm1d(dim)
 
-        self.conv_xt_2 = nn.Conv1d(in_channels=n_filters, out_channels=n_filters, kernel_size=8)        
+        self.conv_xt_2 = nn.Conv1d(in_channels=n_filters, out_channels=n_filters, kernel_size=8)
         self.attention_2 = A.Attention(dim)
 
         self.fc1_xd = Linear(dim, output_dim)
@@ -96,6 +96,7 @@ class AttnGINConvNet(torch.nn.Module):
         x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
         output_1, weights_1 = self.attention(conv_xt_1, x_reshaped.float()) # query, context
+        pdb.set_trace()
 
         x = F.relu(self.conv4(x, edge_index))
         x = self.bn4(x)
