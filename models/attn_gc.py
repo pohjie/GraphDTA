@@ -31,7 +31,7 @@ def shapeback(output, batch, x):
         if batch[i] == batch[i-1]:
             count[i] = count[i-1] + 1
 
-    output_reshaped = np.zeros_like(x.cpu().detach().numpy())
+    output_reshaped = np.zeros_like(x)
     for i in range(batch_size):
         first_dim = batch[i]
         sec_dim = count[i]
@@ -119,7 +119,8 @@ class AttnGC(torch.nn.Module):
                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
 
         output, weights = self.attention(x_reshaped.float(), conv_xt) # query, context
-        output_reshaped = torch.from_numpy(shapeback(output, batch, x)).to(device)
+        output_reshaped = torch.from_numpy(shapeback(output.cpu().detach().numpy(), 
+                                batch.cpu().numpy(), x.cpu().detach().numpy())).to(device)
 
         # carry on with x (drug)
         x = global_add_pool(output_reshaped, batch)
