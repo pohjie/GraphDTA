@@ -26,7 +26,7 @@ def fast_reshape(batch, x, x_reshaped):
 @jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
 def shapeback(output, batch, x): 
     batch_size = batch.shape[0]
-    count = np.zeros(batch_size, dtype=np.int)
+    count = np.zeros(batch_size, dtype=np.int8)
     for i in range(1, batch_size):
         if batch[i] == batch[i-1]:
             count[i] = count[i-1] + 1
