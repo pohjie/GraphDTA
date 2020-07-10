@@ -23,6 +23,23 @@ def fast_reshape(batch, x, x_reshaped):
 
     return x_reshaped
 
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def shapeback(output, batch, x): 
+    batch_size = batch.shape[0]
+    count = np.zeros(batch_size, dtype=np.int)
+    for i in range(1, batch_size):
+        if batch[i] == batch[i-1]:
+            count[i] = count[i-1] + 1
+
+    output_reshaped = np.zeros_like(x.cpu().detach().numpy())
+    for i in range(batch_size):
+        first_dim = batch[i]
+        sec_dim = count[i]
+        output_reshaped[i, :] = output[first_dim, sec_dim, :]
+
+    return output_reshaped
+
+
 # GINConv model
 class AttnGC(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
@@ -102,15 +119,15 @@ class AttnGC(torch.nn.Module):
                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
 
         output, weights = self.attention(x_reshaped.float(), conv_xt) # query, context
-
+        output_reshaped = torch.from_numpy(shapeback(output, batch, x)).to(device)
 
         # carry on with x (drug)
-        x = global_add_pool(x, batch)
+        x = global_add_pool(output_reshaped, batch)
         x = F.relu(self.fc1_xd(x))
         x = F.dropout(x, p=0.2, training=self.training)
 
         # flatten
-        xt = output.view(-1, 32 * 121)
+        xt = conv_xt.view(-1, 32 * 121)
         xt = self.fc1_xt(xt)
 
         # concat
