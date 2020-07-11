@@ -5,6 +5,8 @@ from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 
+from ..utils import fast_reshape, shapeback
+
 import pdb
 
 # GINConv model
