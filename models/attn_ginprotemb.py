@@ -14,7 +14,7 @@ class AttnGINProtEmb(torch.nn.Module):
 
         super(AttnGINProtEmb, self).__init__()
 
-        dim = 32
+        dim = 128
         self.dropout = nn.Dropout(dropout)
         self.relu = nn.ReLU()
         self.n_output = n_output
@@ -52,10 +52,30 @@ class AttnGINProtEmb(torch.nn.Module):
         x = self.bn2(x)
         x = F.relu(self.conv3(x, edge_index))
         x = self.bn3(x)
-        x = global_add_pool(x, batch)
+
+        embedded_xt = self.embedding_xt(target)
+
+        # Attention mechanism here
+        # reshape x (drug) into appropriate dim
+        batch_size = target.shape[0]
+        v, i = torch.mode(batch)
+        v_freq = batch.eq(v.item()).sum().item()
+        x_reshaped = torch.zeros([batch_size, v_freq, embedded_xt.shape[2]],
+                                    dtype=torch.float64)
+
+        # create a count for the 2nd dim
+        device = x.get_device()
+        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
+                     x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
+
+        output, weights = self.attention(x_reshaped.float(), embedded_xt) # query, context
+        output_reshaped = torch.from_numpy(shapeback(output.cpu().detach().numpy(), 
+                                batch.cpu().numpy(), x.cpu().detach().numpy())).to(device)
+
+        x = global_add_pool(output_reshaped, batch)
         x = F.relu(self.fc1_xd(x))
         x = F.dropout(x, p=0.2, training=self.training)
-        embedded_xt = self.embedding_xt(target)
+
         # flatten
         xt = embedded_xt.view(-1, 1000 * 128)
         xt = self.fc1_xt(xt)
