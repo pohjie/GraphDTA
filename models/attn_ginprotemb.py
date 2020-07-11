@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
+import torchnlp.nn.attention as A
 
 from numba import jit
 import numpy as np
@@ -21,7 +22,7 @@ def fast_reshape(batch, x, x_reshaped):
     return x_reshaped
 
 @jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
-def shapeback(output, batch, x): 
+def shapeback(output, batch, x):
     batch_size = batch.shape[0]
     count = np.zeros(batch_size, dtype=np.int8)
     for i in range(1, batch_size):
@@ -59,6 +60,8 @@ class AttnGINProtEmb(torch.nn.Module):
         nn3 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
         self.conv3 = GINConv(nn3)
         self.bn3 = torch.nn.BatchNorm1d(dim)
+
+        self.attention = A.Attention(dim)
 
         self.fc1_xd = Linear(dim, output_dim)
 
@@ -98,7 +101,7 @@ class AttnGINProtEmb(torch.nn.Module):
                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
 
         output, weights = self.attention(x_reshaped.float(), embedded_xt) # query, context
-        output_reshaped = torch.from_numpy(shapeback(output.cpu().detach().numpy(), 
+        output_reshaped = torch.from_numpy(shapeback(output.cpu().detach().numpy(),
                                 batch.cpu().numpy(), x.cpu().detach().numpy())).to(device)
 
         x = global_add_pool(output_reshaped, batch)
