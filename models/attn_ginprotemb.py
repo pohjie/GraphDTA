@@ -8,11 +8,11 @@ from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 import pdb
 
 # GINConv model
-class GINProtEmbDouble(torch.nn.Module):
+class GINProtEmb(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
                  n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
 
-        super(GINProtEmbDouble, self).__init__()
+        super(GINProtEmb, self).__init__()
 
         dim = 32
         self.dropout = nn.Dropout(dropout)
@@ -31,37 +31,9 @@ class GINProtEmbDouble(torch.nn.Module):
         self.conv3 = GINConv(nn3)
         self.bn3 = torch.nn.BatchNorm1d(dim)
 
-        nn4 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
-        self.conv4 = GINConv(nn4)
-        self.bn4 = torch.nn.BatchNorm1d(dim)
-
-        nn5 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
-        self.conv5 = GINConv(nn5)
-        self.bn5 = torch.nn.BatchNorm1d(dim)
-
-        nn6 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
-        self.conv6 = GINConv(nn6)
-        self.bn6 = torch.nn.BatchNorm1d(dim)
-
-        nn7 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
-        self.conv7 = GINConv(nn7)
-        self.bn7 = torch.nn.BatchNorm1d(dim)
-
-        nn8 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
-        self.conv8 = GINConv(nn8)
-        self.bn8 = torch.nn.BatchNorm1d(dim)
-
-        nn9 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
-        self.conv9 = GINConv(nn9)
-        self.bn9 = torch.nn.BatchNorm1d(dim)
-
-        nn10 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
-        self.conv10 = GINConv(nn10)
-        self.bn10 = torch.nn.BatchNorm1d(dim)
-
         self.fc1_xd = Linear(dim, output_dim)
 
-        # 1D convolution on protein sequence
+        # protein sequence embedding
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
         self.fc1_xt = nn.Linear(128 * 1000, output_dim)
 
@@ -80,20 +52,6 @@ class GINProtEmbDouble(torch.nn.Module):
         x = self.bn2(x)
         x = F.relu(self.conv3(x, edge_index))
         x = self.bn3(x)
-        x = F.relu(self.conv4(x, edge_index))
-        x = self.bn4(x)
-        x = F.relu(self.conv5(x, edge_index))
-        x = self.bn5(x)
-        x = F.relu(self.conv6(x, edge_index))
-        x = self.bn6(x)
-        x = F.relu(self.conv7(x, edge_index))
-        x = self.bn7(x)
-        x = F.relu(self.conv8(x, edge_index))
-        x = self.bn8(x)
-        x = F.relu(self.conv9(x, edge_index))
-        x = self.bn9(x)
-        x = F.relu(self.conv10(x, edge_index))
-        x = self.bn10(x)
         x = global_add_pool(x, batch)
         x = F.relu(self.fc1_xd(x))
         x = F.dropout(x, p=0.2, training=self.training)
