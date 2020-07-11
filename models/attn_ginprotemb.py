@@ -6,6 +6,7 @@ from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 
 from numba import jit
+import numpy as np
 import pdb
 
 @jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit

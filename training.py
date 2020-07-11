@@ -10,7 +10,6 @@ from models.gcn import GCNNet
 from models.ginconv import GINConvNet
 from models.ginlstm import GINLSTM
 from models.ginprotemb import GINProtEmb
-from models.ginprotembdouble import GINProtEmbDouble
 from models.directemb import DirectEmb
 from models.attn_gc import AttnGC
 from models.attn_ginconv import AttnGINConvNet
