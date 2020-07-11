@@ -5,9 +5,35 @@ from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 
-from ..utils import fast_reshape, shapeback
-
+from numba import jit
 import pdb
+
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def fast_reshape(batch, x, x_reshaped):
+    count = np.zeros(x_reshaped.shape[0], dtype=np.int8)
+    for i in range(batch.shape[0]):
+        idx = batch[i]
+        sec_dim = count[idx]
+        x_reshaped[idx, sec_dim, :] = x[i]
+        count[idx] += 1
+
+    return x_reshaped
+
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def shapeback(output, batch, x): 
+    batch_size = batch.shape[0]
+    count = np.zeros(batch_size, dtype=np.int8)
+    for i in range(1, batch_size):
+        if batch[i] == batch[i-1]:
+            count[i] = count[i-1] + 1
+
+    output_reshaped = np.zeros_like(x)
+    for i in range(batch_size):
+        first_dim = batch[i]
+        sec_dim = count[i]
+        output_reshaped[i, :] = output[first_dim, sec_dim, :]
+
+    return output_reshaped
 
 # GINConv model
 class AttnGINProtEmb(torch.nn.Module):
