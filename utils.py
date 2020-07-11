@@ -7,6 +7,8 @@ from torch_geometric.data import InMemoryDataset, DataLoader
 from torch_geometric import data as DATA
 import torch
 
+from numba import jit
+
 class TestbedDataset(InMemoryDataset):
     def __init__(self, root='/tmp', dataset='davis',
                  xd=None, xt=None, y=None, transform=None,
@@ -93,3 +95,30 @@ def spearman(y,f):
     return rs
 def ci(y,f):
     return concordance_index(y, f)
+
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def fast_reshape(batch, x, x_reshaped):
+    count = np.zeros(x_reshaped.shape[0], dtype=np.int8)
+    for i in range(batch.shape[0]):
+        idx = batch[i]
+        sec_dim = count[idx]
+        x_reshaped[idx, sec_dim, :] = x[i]
+        count[idx] += 1
+
+    return x_reshaped
+
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def shapeback(output, batch, x): 
+    batch_size = batch.shape[0]
+    count = np.zeros(batch_size, dtype=np.int8)
+    for i in range(1, batch_size):
+        if batch[i] == batch[i-1]:
+            count[i] = count[i-1] + 1
+
+    output_reshaped = np.zeros_like(x)
+    for i in range(batch_size):
+        first_dim = batch[i]
+        sec_dim = count[i]
+        output_reshaped[i, :] = output[first_dim, sec_dim, :]
+
+    return output_reshaped

@@ -8,11 +8,11 @@ from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 import pdb
 
 # GINConv model
-class GINProtEmb(torch.nn.Module):
+class AttnGINProtEmb(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
                  n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
 
-        super(GINProtEmb, self).__init__()
+        super(AttnGINProtEmb, self).__init__()
 
         dim = 32
         self.dropout = nn.Dropout(dropout)
@@ -55,7 +55,6 @@ class GINProtEmb(torch.nn.Module):
         x = global_add_pool(x, batch)
         x = F.relu(self.fc1_xd(x))
         x = F.dropout(x, p=0.2, training=self.training)
-
         embedded_xt = self.embedding_xt(target)
         # flatten
         xt = embedded_xt.view(-1, 1000 * 128)
