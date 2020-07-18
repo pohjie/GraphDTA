@@ -92,7 +92,7 @@ class AttnGINConvNet(torch.nn.Module):
         batch_size = target.shape[0]
         v, i = torch.mode(batch)
         v_freq = batch.eq(v.item()).sum().item()
-        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]],
+        x_reshaped = torch.zeros([batch_size, v_freq, embedded_xt.shape[2]],
                                     dtype=torch.float64)
 
         # create a count for the 2nd dim
