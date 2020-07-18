@@ -24,11 +24,11 @@ def fast_reshape(batch, x, x_reshaped):
     return x_reshaped
 
 # GINConv model
-class TwoAttnGINConvNet(torch.nn.Module):
+class DoubAttnGINConvNet(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
                  n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
 
-        super(TwoAttnGINConvNet, self).__init__()
+        super(DoubAttnGINConvNet, self).__init__()
 
         dim = 121
         self.dropout = nn.Dropout(dropout)
@@ -47,11 +47,6 @@ class TwoAttnGINConvNet(torch.nn.Module):
         self.conv3 = GINConv(nn3)
         self.bn3 = torch.nn.BatchNorm1d(dim)
 
-        # 1D convolution on protein sequence
-        self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
-        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
-        self.attention_1 = A.Attention(dim)
-
         nn4 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
         self.conv4 = GINConv(nn4)
         self.bn4 = torch.nn.BatchNorm1d(dim)
@@ -60,11 +55,15 @@ class TwoAttnGINConvNet(torch.nn.Module):
         self.conv5 = GINConv(nn5)
         self.bn5 = torch.nn.BatchNorm1d(dim)
 
-        self.conv_xt_2 = nn.Conv1d(in_channels=n_filters, out_channels=n_filters, kernel_size=8)
+        # Feed in output of self.bn5 into the attention mechanism, which will compute key, value pairs
+        self.attention_1 = A.Attention(dim)
         self.attention_2 = A.Attention(dim)
 
         self.fc1_xd = Linear(dim, output_dim)
 
+        # 1D convolution on protein sequence
+        self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
+        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
         self.fc1_xt = nn.Linear(32*121, output_dim)
 
         # combined layers
@@ -76,51 +75,43 @@ class TwoAttnGINConvNet(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         target = data.target
 
-        device = x.get_device()
-        batch_size = target.shape[0]
-        v, i = torch.mode(batch)
-        v_freq = batch.eq(v.item()).sum().item()
-
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
         x = F.relu(self.conv2(x, edge_index))
         x = self.bn2(x)
         x = F.relu(self.conv3(x, edge_index))
         x = self.bn3(x)
-
-        embedded_xt = self.embedding_xt(target)
-        conv_xt_1 = self.conv_xt_1(embedded_xt)
-
-        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt_1.shape[2]],
-                                    dtype=torch.float64)
-        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
-                     x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
-        output_1, weights_1 = self.attention(conv_xt_1, x_reshaped.float()) # query, context
-        pdb.set_trace()
-
         x = F.relu(self.conv4(x, edge_index))
         x = self.bn4(x)
         x = F.relu(self.conv5(x, edge_index))
         x = self.bn5(x)
 
-        conv_xt_2 = self.conv_xt_2(output_1)
+        embedded_xt = self.embedding_xt(target)
+        conv_xt = self.conv_xt_1(embedded_xt)
 
+        # attention mechanism
+        # reshape x (drug) into appropriate dim
         batch_size = target.shape[0]
         v, i = torch.mode(batch)
         v_freq = batch.eq(v.item()).sum().item()
-        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt_2.shape[2]],
+        x_reshaped = torch.zeros([batch_size, v_freq, conv_xt.shape[2]],
                                     dtype=torch.float64)
+
+        # create a count for the 2nd dim
+        device = x.get_device()
         x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
-        output_2, weights_2 = self.attention(conv_xt_2, x_reshaped.float()) # query, context
+
+        output_xt, weights_xt = self.attention_1(conv_xt, x_reshaped.float()) # query, context
+        output_xd, weights_xd = self.attention_2(x_reshaped.float(), conv_xt)
 
         # carry on with x (drug)
-        x = global_add_pool(x, batch)
+        x = global_add_pool(output_xd, batch)
         x = F.relu(self.fc1_xd(x))
         x = F.dropout(x, p=0.2, training=self.training)
 
         # flatten
-        xt = output_2.view(-1, 32 * 121)
+        xt = output_xt.view(-1, 32 * 121)
         xt = self.fc1_xt(xt)
 
         # concat
