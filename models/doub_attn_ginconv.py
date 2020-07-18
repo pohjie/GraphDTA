@@ -23,6 +23,22 @@ def fast_reshape(batch, x, x_reshaped):
 
     return x_reshaped
 
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def shapeback(output, batch, x): 
+    batch_size = batch.shape[0]
+    count = np.zeros(batch_size, dtype=np.int8)
+    for i in range(1, batch_size):
+        if batch[i] == batch[i-1]:
+            count[i] = count[i-1] + 1
+
+    output_reshaped = np.zeros_like(x)
+    for i in range(batch_size):
+        first_dim = batch[i]
+        sec_dim = count[i]
+        output_reshaped[i, :] = output[first_dim, sec_dim, :]
+
+    return output_reshaped
+
 # GINConv model
 class DoubAttnGINConvNet(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
@@ -104,6 +120,8 @@ class DoubAttnGINConvNet(torch.nn.Module):
 
         output_xt, weights_xt = self.attention_1(conv_xt, x_reshaped.float()) # query, context
         output_xd, weights_xd = self.attention_2(x_reshaped.float(), conv_xt)
+        output_xd = torch.from_numpy(shapeback(output_xd.cpu().detach().numpy(), 
+                                batch.cpu().numpy(), x.cpu().detach().numpy())).to(device)
 
         # carry on with x (drug)
         x = global_add_pool(output_xd, batch)
