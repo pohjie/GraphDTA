@@ -30,7 +30,7 @@ class AttnGINConvNet(torch.nn.Module):
 
         super(AttnGINConvNet, self).__init__()
 
-        dim = 121
+        dim = 128
         self.dropout = nn.Dropout(dropout)
         self.relu = nn.ReLU()
         self.n_output = n_output
