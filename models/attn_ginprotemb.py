@@ -67,7 +67,9 @@ class AttnGINProtEmb(torch.nn.Module):
 
         # protein sequence embedding
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
-        self.fc1_xt = nn.Linear(128 * 1000, output_dim)
+        self.conv_xt_1 = nn.Conv1d(in_channels=1000, out_channels=n_filters, kernel_size=8)
+        
+        self.fc1_xt = nn.Linear(32*121, output_dim)
 
         # combined layers
         self.fc1 = nn.Linear(256, 1024)
@@ -86,6 +88,7 @@ class AttnGINProtEmb(torch.nn.Module):
         x = self.bn3(x)
 
         embedded_xt = self.embedding_xt(target)
+        conv_xt = self.conv_xt_1(embedded_xt)
 
         # Attention mechanism here
         # reshape x (drug) into appropriate dim
@@ -109,7 +112,7 @@ class AttnGINProtEmb(torch.nn.Module):
         x = F.dropout(x, p=0.2, training=self.training)
 
         # flatten
-        xt = embedded_xt.view(-1, 1000 * 128)
+        xt = conv_xt.view(-1, 32 * 121)
         xt = self.fc1_xt(xt)
 
         # concat
