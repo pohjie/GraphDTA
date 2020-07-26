@@ -11,10 +11,10 @@ from numba import jit
 import numpy as np
 
 # GAT  model
-class GATNet(torch.nn.Module):
+class AttnGATNet(torch.nn.Module):
     def __init__(self, num_features_xd=78, n_output=1, num_features_xt=25,
                      n_filters=32, embed_dim=128, output_dim=128, dropout=0.2):
-        super(GATNet, self).__init__()
+        super(AttnGATNet, self).__init__()
 
         # graph layers
         self.gcn1 = GATConv(num_features_xd, num_features_xd, heads=10, dropout=dropout)
