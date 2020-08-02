@@ -5,6 +5,17 @@ from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GATConv
 from torch_geometric.nn import global_max_pool as gmp
 
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def fast_reshape(batch, x, x_reshaped):
+    count = np.zeros(x_reshaped.shape[0], dtype=np.int8)
+    for i in range(batch.shape[0]):
+        idx = batch[i]
+        sec_dim = count[idx]
+        x_reshaped[idx, sec_dim, :] = x[i]
+        count[idx] += 1
+
+    return x_reshaped
+    
 # GAT  model
 class GATNet(torch.nn.Module):
     def __init__(self, num_features_xd=78, n_output=1, num_features_xt=25,

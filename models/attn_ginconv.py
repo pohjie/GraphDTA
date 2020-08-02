@@ -74,16 +74,34 @@ class AttnGINConvNet(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         target = data.target
 
+        # skip connections
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
+        identity_x = x
         x = F.relu(self.conv2(x, edge_index))
         x = self.bn2(x)
+        # first skip connection
+        x += identity_x
         x = F.relu(self.conv3(x, edge_index))
         x = self.bn3(x)
+        identity_x = x
         x = F.relu(self.conv4(x, edge_index))
         x = self.bn4(x)
+        # second skip connection
+        x += identity_x
         x = F.relu(self.conv5(x, edge_index))
         x = self.bn5(x)
+
+        # x = F.relu(self.conv1(x, edge_index))
+        # x = self.bn1(x)
+        # x = F.relu(self.conv2(x, edge_index))
+        # x = self.bn2(x)
+        # x = F.relu(self.conv3(x, edge_index))
+        # x = self.bn3(x)
+        # x = F.relu(self.conv4(x, edge_index))
+        # x = self.bn4(x)
+        # x = F.relu(self.conv5(x, edge_index))
+        # x = self.bn5(x)
 
         embedded_xt = self.embedding_xt(target)
 

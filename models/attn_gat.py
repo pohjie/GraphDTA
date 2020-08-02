@@ -82,7 +82,7 @@ class AttnGATNet(torch.nn.Module):
         x = self.fc_g1(x)
         x = self.relu(x)
 
-        conv_xt = self.conv_xt_1(output)
+        conv_xt = self.conv_xt1(output)
         conv_xt = self.relu(conv_xt)
 
         # flatten
