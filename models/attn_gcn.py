@@ -41,7 +41,7 @@ class AttnGCNNet(torch.nn.Module):
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
 
-        self.attention = A.Attention(dim)
+        self.attention = A.Attention(embed_dim)
 
         # protein sequence branch (1d conv)
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
@@ -102,7 +102,7 @@ class AttnGCNNet(torch.nn.Module):
         output, weights = self.attention(embedded_xt, x_reshaped.float()) # query, context
         conv_xt = self.conv_xt_1(output)
         # conv_xt = self.conv_xt_1(embedded_xt)
-        
+
         # flatten
         xt = conv_xt.view(-1, 32 * 121)
         xt = self.fc1_xt(xt)
