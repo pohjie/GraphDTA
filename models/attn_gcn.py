@@ -31,12 +31,10 @@ class AttnGCNNet(torch.nn.Module):
         # SMILES graph branch
         self.n_output = n_output
         self.conv1 = GCNConv(num_features_xd, num_features_xd)
-        self.conv2 = GCNConv(num_features_xd, num_features_xd*2)
-        self.conv3 = GCNConv(num_features_xd*2, num_features_xd * 4)
-        self.conv4 = GCNConv(num_features_xd*4, num_features_xd*8)
-        self.conv5 = GCNConv(num_features_xd*8, num_features_xd*16)
-        self.conv6 = GCNConv(num_features_xd*16, num_features_xd*32)
-        self.fc_g1 = torch.nn.Linear(num_features_xd*32, 1024)
+        self.conv2 = GCNConv(num_features_xd, num_features_xd+10)
+        self.conv3 = GCNConv(num_features_xd+10, num_features_xd+20)
+        self.conv4 = GCNConv(num_features_xd+20, num_features_xd+30)
+        self.fc_g1 = torch.nn.Linear(num_features_xd+50, 1024)
         self.fc_g2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
@@ -61,21 +59,25 @@ class AttnGCNNet(torch.nn.Module):
 
         x = self.conv1(x, edge_index)
         x = self.relu(x)
-
         x = self.conv2(x, edge_index)
         x = self.relu(x)
-
         x = self.conv3(x, edge_index)
         x = self.relu(x)
 
-        x = self.conv4(x, edge_index)
-        x = self.relu(x)
+        # 1d conv layers
+        embedded_xt = self.embedding_xt(target)
 
-        x = self.conv5(x, edge_index)
-        x = self.relu(x)
+        batch_size = target.shape[0]
+        v, i = torch.mode(batch)
+        v_freq = batch.eq(v.item()).sum().item()
+        x_reshaped = torch.zeros([batch_size, v_freq, embedded_xt.shape[2]],
+                                  dtype=torch.float64)
 
-        x = self.conv6(x, edge_index)
-        x = self.relu(x)
+        # create a count for the 2nd dim
+        device = x.get_device()
+        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
+                                      x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
+
 
         x = gmp(x, batch)       # global max pooling
 
@@ -85,21 +87,8 @@ class AttnGCNNet(torch.nn.Module):
         x = self.fc_g2(x)
         x = self.dropout(x)
 
-        # 1d conv layers
-        embedded_xt = self.embedding_xt(target)
-
-        batch_size = target.shape[0]
-        v, i = torch.mode(batch)
-        v_freq = batch.eq(v.item()).sum().item()
-        x_reshaped = torch.zeros([batch_size, v_freq, embedded_xt.shape[2]],
-                                    dtype=torch.float64)
-
-        # create a count for the 2nd dim
-        device = x.get_device()
-        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
-                     x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
-
         output, weights = self.attention(embedded_xt, x_reshaped.float()) # query, context
+        pdb.set_trace()
         conv_xt = self.conv_xt_1(output)
         # conv_xt = self.conv_xt_1(embedded_xt)
 
