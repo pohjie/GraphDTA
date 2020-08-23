@@ -3,6 +3,24 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, global_max_pool as gmp
 
+import torchnlp.nn.attention as A
+
+from numba import jit
+import numpy as np
+
+import pdb
+import time
+
+@jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
+def fast_reshape(batch, x, x_reshaped):
+    count = np.zeros(x_reshaped.shape[0], dtype=np.int8)
+    for i in range(batch.shape[0]):
+        idx = batch[i]
+        sec_dim = count[idx]
+        x_reshaped[idx, sec_dim, :] = x[i]
+        count[idx] += 1
+
+    return x_reshaped
 
 # GCN based model
 class AttnGCNNet(torch.nn.Module):
@@ -22,6 +40,8 @@ class AttnGCNNet(torch.nn.Module):
         self.fc_g2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
+
+        self.attention = A.Attention(dim)
 
         # protein sequence branch (1d conv)
         self.embedding_xt = nn.Embedding(num_features_xt + 1, embed_dim)
@@ -56,7 +76,9 @@ class AttnGCNNet(torch.nn.Module):
 
         x = self.conv6(x, edge_index)
         x = self.relu(x)
-        
+
+        pdb.set_trace()
+
         x = gmp(x, batch)       # global max pooling
 
         # flatten
