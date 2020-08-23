@@ -13,12 +13,15 @@ class GCNNet(torch.nn.Module):
         # SMILES graph branch
         self.n_output = n_output
         self.conv1 = GCNConv(num_features_xd, num_features_xd)
-        self.conv2 = GCNConv(num_features_xd, num_features_xd*2)
-        self.conv3 = GCNConv(num_features_xd*2, num_features_xd * 4)
-        self.conv4 = GCNConv(num_features_xd*4, num_features_xd*8)
-        self.conv5 = GCNConv(num_features_xd*8, num_features_xd*16)
-        self.conv6 = GCNConv(num_features_xd*16, num_features_xd*32)
-        self.fc_g1 = torch.nn.Linear(num_features_xd*32, 1024)
+        # self.conv2 = GCNConv(num_features_xd, num_features_xd*2)
+        # self.conv3 = GCNConv(num_features_xd*2, num_features_xd * 4)
+        # self.fc_g1 = torch.nn.Linear(num_features_xd*4, 1024)
+        self.conv2 = GCNConv(num_features_xd, num_features_xd+10)
+        self.conv3 = GCNConv(num_features_xd+10, num_features_xd+20)
+        self.conv4 = GCNConv(num_features_xd+20, num_features_xd+30)
+        self.conv5 = GCNConv(num_features_xd+30, num_features_xd+40)
+        self.conv6 = GCNConv(num_features_xd+40, num_features_xd+50)
+        self.fc_g1 = torch.nn.Linear(num_features_xd+50, 1024)
         self.fc_g2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
@@ -41,19 +44,14 @@ class GCNNet(torch.nn.Module):
 
         x = self.conv1(x, edge_index)
         x = self.relu(x)
-
         x = self.conv2(x, edge_index)
         x = self.relu(x)
-
         x = self.conv3(x, edge_index)
         x = self.relu(x)
-
         x = self.conv4(x, edge_index)
         x = self.relu(x)
-
         x = self.conv5(x, edge_index)
         x = self.relu(x)
-
         x = self.conv6(x, edge_index)
         x = self.relu(x)
 

@@ -34,6 +34,8 @@ class AttnGCNNet(torch.nn.Module):
         self.conv2 = GCNConv(num_features_xd, num_features_xd+10)
         self.conv3 = GCNConv(num_features_xd+10, num_features_xd+20)
         self.conv4 = GCNConv(num_features_xd+20, num_features_xd+30)
+        self.conv5 = GCNConv(num_features_xd+30, num_features_xd+40)
+        self.conv6 = GCNConv(num_features_xd+40, num_features_xd+50)
         self.fc_g1 = torch.nn.Linear(num_features_xd+50, 1024)
         self.fc_g2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
@@ -62,6 +64,12 @@ class AttnGCNNet(torch.nn.Module):
         x = self.conv2(x, edge_index)
         x = self.relu(x)
         x = self.conv3(x, edge_index)
+        x = self.relu(x)
+        x = self.conv4(x, edge_index)
+        x = self.relu(x)
+        x = self.conv5(x, edge_index)
+        x = self.relu(x)
+        x = self.conv6(x, edge_index)
         x = self.relu(x)
 
         # 1d conv layers
