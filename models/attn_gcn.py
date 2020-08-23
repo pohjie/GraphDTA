@@ -61,12 +61,16 @@ class AttnGCNNet(torch.nn.Module):
 
         x = self.conv1(x, edge_index)
         x = self.relu(x)
+        identity_x = x
         x = self.conv2(x, edge_index)
         x = self.relu(x)
+        x += identity_x
         x = self.conv3(x, edge_index)
         x = self.relu(x)
+        identity_x = x
         x = self.conv4(x, edge_index)
         x = self.relu(x)
+        x += identity_x
         x = self.conv5(x, edge_index)
         x = self.relu(x)
         x = self.conv6(x, edge_index)
@@ -96,7 +100,6 @@ class AttnGCNNet(torch.nn.Module):
         x = self.dropout(x)
 
         output, weights = self.attention(embedded_xt, x_reshaped.float()) # query, context
-        pdb.set_trace()
         conv_xt = self.conv_xt_1(output)
         # conv_xt = self.conv_xt_1(embedded_xt)
 
