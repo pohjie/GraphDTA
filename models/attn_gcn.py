@@ -77,8 +77,6 @@ class AttnGCNNet(torch.nn.Module):
         x = self.conv6(x, edge_index)
         x = self.relu(x)
 
-        pdb.set_trace()
-
         x = gmp(x, batch)       # global max pooling
 
         # flatten
@@ -89,7 +87,22 @@ class AttnGCNNet(torch.nn.Module):
 
         # 1d conv layers
         embedded_xt = self.embedding_xt(target)
-        conv_xt = self.conv_xt_1(embedded_xt)
+
+        batch_size = target.shape[0]
+        v, i = torch.mode(batch)
+        v_freq = batch.eq(v.item()).sum().item()
+        x_reshaped = torch.zeros([batch_size, v_freq, embedded_xt.shape[2]],
+                                    dtype=torch.float64)
+
+        # create a count for the 2nd dim
+        device = x.get_device()
+        x_reshaped = torch.from_numpy(fast_reshape(batch.cpu().numpy(),
+                     x.cpu().detach().numpy(), x_reshaped.numpy())).to(device)
+
+        output, weights = self.attention(embedded_xt, x_reshaped.float()) # query, context
+        conv_xt = self.conv_xt_1(output)
+        # conv_xt = self.conv_xt_1(embedded_xt)
+        
         # flatten
         xt = conv_xt.view(-1, 32 * 121)
         xt = self.fc1_xt(xt)
