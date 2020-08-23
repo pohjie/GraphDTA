@@ -17,6 +17,7 @@ from models.attn_ginconv import AttnGINConvNet
 from models.attn_ginconv_dot import AttnDotGINConvNet
 from models.doub_attn_ginconv import DoubAttnGINConvNet
 from models.attn_ginprotemb import AttnGINProtEmb
+from models.attn_gcn import AttnGCNNet
 from utils import *
 import time
 
@@ -57,7 +58,7 @@ def predicting(model, device, loader):
 
 
 datasets = [['davis','kiba','kiba_small'][int(sys.argv[1])]]
-modeling = [AttnGATNet, AttnGINProtEmb, AttnGC, AttnGINConvNet, 
+modeling = [AttnGCNNet, AttnGINProtEmb, AttnGC, AttnGINConvNet, 
             GINConvNet, GATNet, GAT_GCN, GCNNet, GINProtEmb][int(sys.argv[2])]
 model_st = modeling.__name__
 
