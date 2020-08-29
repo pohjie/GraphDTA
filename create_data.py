@@ -119,28 +119,25 @@ for smile in compound_iso_smiles:
 datasets = ['davis','kiba']
 # convert to PyTorch data format
 for dataset in datasets:
-    processed_data_file_train = 'data/processed/' + dataset + '_train.pt'
-    processed_data_file_test = 'data/processed/' + dataset + '_test.pt'
+    processed_data_file_train = 'data/processed/' + dataset + '_oxy_train.pt'
+    processed_data_file_test = 'data/processed/' + dataset + '_oxy_test.pt'
     if ((not os.path.isfile(processed_data_file_train)) or (not os.path.isfile(processed_data_file_test))):
         df = pd.read_csv('data/' + dataset + '_train.csv')
-        df['oxy'] = count_oxy_bonds(dr['compound_iso_smiles'])
-        pdb.set_trace()
-        train_drugs, train_prots,  train_Y = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity'])
+        df['oxy'] = df.apply(lambda row: row.compound_iso_smiles.count('=O') + row.compound_iso_smiles.count('O='), axis = 1)
+        train_drugs, train_prots,  train_Y, train_oxy = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity']),list(df['oxy'])
         XT = [seq_cat(t) for t in train_prots]
-        train_drugs, train_prots,  train_Y = np.asarray(train_drugs), np.asarray(XT), np.asarray(train_Y)
+        train_drugs, train_prots,  train_Y, train_oxy = np.asarray(train_drugs), np.asarray(XT), np.asarray(train_Y), np.asarray(train_oxy)
         df = pd.read_csv('data/' + dataset + '_test.csv')
-        test_drugs, test_prots,  test_Y = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity'])
+        df['oxy'] = df.apply(lambda row: row.compound_iso_smiles.count('=O') + row.compound_iso_smiles.count('O='), axis = 1)
+        test_drugs, test_prots,  test_Y, test_oxy = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity']),list(df['oxy'])
         XT = [seq_cat(t) for t in test_prots]
-        test_drugs, test_prots,  test_Y = np.asarray(test_drugs), np.asarray(XT), np.asarray(test_Y)
+        test_drugs, test_prots,  test_Y, test_oxy = np.asarray(test_drugs), np.asarray(XT), np.asarray(test_Y), np.asarray(test_oxy)
 
         # make data PyTorch Geometric ready
         print('preparing ', dataset + '_oxy_train.pt in pytorch format!')
-        train_data = TestbedDataset(root='data', dataset=dataset+'_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph)
+        train_data = TestbedDataset(root='data', dataset=dataset+'_oxy_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph, train_oxy=train_oxy)
         print('preparing ', dataset + '_oxy_test.pt in pytorch format!')
-        test_data = TestbedDataset(root='data', dataset=dataset+'_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph)
+        test_data = TestbedDataset(root='data', dataset=dataset+'_oxy_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph, test_oxy=test_oxy)
         print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')        
     else:
         print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')      
-
-def count_oxy_bonds(drug):
-    return drug.count('O=') + drug.count('=O')  
