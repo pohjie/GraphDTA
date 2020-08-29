@@ -8,6 +8,8 @@ from rdkit.Chem import MolFromSmiles
 import networkx as nx
 from utils import *
 
+import pdb
+
 def atom_features(atom):
     return np.array(one_of_k_encoding_unk(atom.GetSymbol(),['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na','Ca', 'Fe', 'As', 'Al', 'I', 'B', 'V', 'K', 'Tl', 'Yb','Sb', 'Sn', 'Ag', 'Pd', 'Co', 'Se', 'Ti', 'Zn', 'H','Li', 'Ge', 'Cu', 'Au', 'Ni', 'Cd', 'In', 'Mn', 'Zr','Cr', 'Pt', 'Hg', 'Pb', 'Unknown']) +
                     one_of_k_encoding(atom.GetDegree(), [0, 1, 2, 3, 4, 5, 6,7,8,9,10]) +
@@ -121,6 +123,8 @@ for dataset in datasets:
     processed_data_file_test = 'data/processed/' + dataset + '_test.pt'
     if ((not os.path.isfile(processed_data_file_train)) or (not os.path.isfile(processed_data_file_test))):
         df = pd.read_csv('data/' + dataset + '_train.csv')
+        df['oxy'] = count_oxy_bonds(dr['compound_iso_smiles'])
+        pdb.set_trace()
         train_drugs, train_prots,  train_Y = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity'])
         XT = [seq_cat(t) for t in train_prots]
         train_drugs, train_prots,  train_Y = np.asarray(train_drugs), np.asarray(XT), np.asarray(train_Y)
@@ -130,10 +134,13 @@ for dataset in datasets:
         test_drugs, test_prots,  test_Y = np.asarray(test_drugs), np.asarray(XT), np.asarray(test_Y)
 
         # make data PyTorch Geometric ready
-        print('preparing ', dataset + '_train.pt in pytorch format!')
+        print('preparing ', dataset + '_oxy_train.pt in pytorch format!')
         train_data = TestbedDataset(root='data', dataset=dataset+'_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph)
-        print('preparing ', dataset + '_test.pt in pytorch format!')
+        print('preparing ', dataset + '_oxy_test.pt in pytorch format!')
         test_data = TestbedDataset(root='data', dataset=dataset+'_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph)
         print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')        
     else:
-        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')        
+        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')      
+
+def count_oxy_bonds(drug):
+    return drug.count('O=') + drug.count('=O')  
