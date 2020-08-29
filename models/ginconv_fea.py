@@ -5,6 +5,8 @@ from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GINConv, global_add_pool
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 
+import pdb
+
 # GINConv model
 class GINConvNetFea(torch.nn.Module):
     def __init__(self, n_output=1,num_features_xd=78, num_features_xt=25,
@@ -51,6 +53,7 @@ class GINConvNetFea(torch.nn.Module):
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
+        c = data.c
         target = data.target
 
         x = F.relu(self.conv1(x, edge_index))
@@ -75,6 +78,8 @@ class GINConvNetFea(torch.nn.Module):
 
         # concat
         xc = torch.cat((x, xt), 1)
+
+        pdb.set_trace()
         # add some dense layers
         xc = self.fc1(xc)
         xc = self.relu(xc)
