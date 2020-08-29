@@ -47,14 +47,14 @@ class GINConvNetFea(torch.nn.Module):
         self.fc1_xt = nn.Linear(32*121, output_dim)
 
         # combined layers
-        self.fc1 = nn.Linear(256, 1024)
+        self.fc1 = nn.Linear(257, 1024)
         self.fc2 = nn.Linear(1024, 256)
         self.out = nn.Linear(256, self.n_output)        # n_output = 1 for regression task
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
-        c = data.c
         target = data.target
+        count = data.c.unsqueeze(1)
 
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
@@ -78,8 +78,8 @@ class GINConvNetFea(torch.nn.Module):
 
         # concat
         xc = torch.cat((x, xt), 1)
+        xc = torch.cat((count, xc), axis=1)
 
-        pdb.set_trace()
         # add some dense layers
         xc = self.fc1(xc)
         xc = self.relu(xc)
