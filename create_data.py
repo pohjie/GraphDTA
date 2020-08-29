@@ -135,9 +135,9 @@ for dataset in datasets:
 
         # make data PyTorch Geometric ready
         print('preparing ', dataset + '_oxy_train.pt in pytorch format!')
-        train_data = TestbedDataset(root='data', dataset=dataset+'_oxy_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph, train_oxy=train_oxy)
+        train_data = TestbedDataset(root='data', dataset=dataset+'_oxy_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph, oxy=train_oxy)
         print('preparing ', dataset + '_oxy_test.pt in pytorch format!')
-        test_data = TestbedDataset(root='data', dataset=dataset+'_oxy_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph, test_oxy=test_oxy)
+        test_data = TestbedDataset(root='data', dataset=dataset+'_oxy_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph, oxy=test_oxy)
         print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')        
     else:
         print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')      
