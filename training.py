@@ -18,6 +18,7 @@ from models.attn_ginconv_dot import AttnDotGINConvNet
 from models.doub_attn_ginconv import DoubAttnGINConvNet
 from models.attn_ginprotemb import AttnGINProtEmb
 from models.attn_gcn import AttnGCNNet
+from models.ginconv_fea import GINConvNetFea
 from utils import *
 import time
 
@@ -79,13 +80,13 @@ print('Epochs: ', NUM_EPOCHS)
 # Main program: iterate over different datasets
 for dataset in datasets:
     print('\nrunning on ', model_st + '_' + dataset )
-    processed_data_file_train = 'data/processed/' + dataset + 'oxy_train.pt'
-    processed_data_file_test = 'data/processed/' + dataset + 'oxy_test.pt'
+    processed_data_file_train = 'data/processed/' + dataset + '_oxy_train.pt'
+    processed_data_file_test = 'data/processed/' + dataset + '_oxy_test.pt'
     if ((not os.path.isfile(processed_data_file_train)) or (not os.path.isfile(processed_data_file_test))):
         print('please run create_data.py to prepare data in pytorch format!')
     else:
-        train_data = TestbedDataset(root='data', dataset=dataset+'oxy_train')
-        test_data = TestbedDataset(root='data', dataset=dataset+'oxy_test')
+        train_data = TestbedDataset(root='data', dataset=dataset+'_oxy_train')
+        test_data = TestbedDataset(root='data', dataset=dataset+'_oxy_test')
 
         # make data PyTorch mini-batch processing ready
         train_loader = DataLoader(train_data, batch_size=TRAIN_BATCH_SIZE, shuffle=True)
