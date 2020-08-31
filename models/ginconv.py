@@ -55,12 +55,16 @@ class GINConvNet(torch.nn.Module):
 
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
+        identity_x = x
         x = F.relu(self.conv2(x, edge_index))
         x = self.bn2(x)
+        x += identity_x
         x = F.relu(self.conv3(x, edge_index))
         x = self.bn3(x)
+        identity_x = x
         x = F.relu(self.conv4(x, edge_index))
         x = self.bn4(x)
+        x += identity_x
         x = F.relu(self.conv5(x, edge_index))
         x = self.bn5(x)
         x = global_add_pool(x, batch)
