@@ -52,12 +52,12 @@ def predicting(model, device, loader):
 
 
 datasets = [['davis','kiba','kiba_small'][int(sys.argv[1])]]
-modeling = [GINConvNet, GATNet, GAT_GCN, GCNNet, GINLSTM, GINProtEmb, GINProtEmbDouble, DirectEmb][int(sys.argv[2])]
+modeling = [GINConvNet, GATNet, GAT_GCN, GCNNet, GINLSTM, GINProtEmb, DirectEmb][int(sys.argv[2])]
 model_st = modeling.__name__
 
 cuda_name = "cuda:0"
 if len(sys.argv)>3:
-    cuda_name = ["cuda:0","cuda:1"][int(sys.argv[3])]
+    cuda_name = ["cuda:0","cuda:1","cuda:2","cuda:3"][int(sys.argv[3])]
 print('cuda_name:', cuda_name)
 
 TRAIN_BATCH_SIZE = 512
@@ -84,6 +84,7 @@ for dataset in datasets:
         train_loader = DataLoader(train_data, batch_size=TRAIN_BATCH_SIZE, shuffle=True)
         test_loader = DataLoader(test_data, batch_size=TEST_BATCH_SIZE, shuffle=False)
 
+        pdb.set_trace()
         # training the model
         device = torch.device(cuda_name if torch.cuda.is_available() else "cpu")
         model = modeling().to(device)
