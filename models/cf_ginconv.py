@@ -17,8 +17,13 @@ class CFGINConvNet(torch.nn.Module):
         self.tgt_emb = nn.Embedding(379, 128)
 
         # kiba
-        self.smiles_emb = nn.Embedding(2068, 128)
-        self.tgt_emb = nn.Embedding(229, 128)
+        # self.smiles_emb = nn.Embedding(2068, 128)
+        # self.tgt_emb = nn.Embedding(229, 128)
+
+        self.drop1 = nn.Droupout(0.1)
+        self.cf_fc1 = nn.Linear(256, 1024)
+        self.cf_fc2 = nn.Linear(1024, 256)
+
 
         dim = 32
         self.dropout = nn.Dropout(dropout)
@@ -55,17 +60,26 @@ class CFGINConvNet(torch.nn.Module):
         # combined layers
         self.fc1 = nn.Linear(256, 1024)
         self.fc2 = nn.Linear(1024, 256)
-        self.out = nn.Linear(256, self.n_output)        # n_output = 1 for regression task
+
+        self.out = nn.Linear(512, self.n_output)        # n_output = 1 for regression task
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         target = data.target
 
+        # CF
         embedded_smiles = self.smiles_emb(data.smiles_idx)
         embedded_tgt = self.tgt_emb(data.tgt_idx)
 
         # pass through 2 layers then concat with GNN output
+        cf_x = torch.cat([embedded_smiles, embedded_tgt], 1)
+        cf_x = self.relu(self.cf_fc1(cf_x))
+        cf_x = self.drop1(cf_x)
+        cf_x = self.relu(cf_fc2(cf_x))
+        cf_x = self.drop1(cf_x)
 
+
+        # GNN
         x = F.relu(self.conv1(x, edge_index))
         x = self.bn1(x)
         x = F.relu(self.conv2(x, edge_index))
@@ -95,5 +109,8 @@ class CFGINConvNet(torch.nn.Module):
         xc = self.fc2(xc)
         xc = self.relu(xc)
         xc = self.dropout(xc)
+
+        # emsemble
+        xc = torch.cat((xc, cf_x), 1)
         out = self.out(xc)
         return out
