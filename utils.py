@@ -7,6 +7,8 @@ from torch_geometric.data import InMemoryDataset, DataLoader
 from torch_geometric import data as DATA
 import torch
 
+import pdb
+
 class TestbedDataset(InMemoryDataset):
     def __init__(self, root='/tmp', dataset='davis',
                  xd=None, xt=None, y=None, transform=None,
@@ -53,17 +55,32 @@ class TestbedDataset(InMemoryDataset):
         assert (len(xd) == len(xt) and len(xt) == len(y)), "The three lists must be the same length!"
         data_list = []
         data_len = len(xd)
+
+        all_smiles = {}
+        smiles_count = 0
+        all_targets = {}
+        targets_count = 0
         for i in range(data_len):
             print('Converting SMILES to graph: {}/{}'.format(i+1, data_len))
             smiles = xd[i]
             target = xt[i]
             labels = y[i]
+
+            if smiles not in all_smiles:
+                all_smiles[smiles] = smiles_count
+                smiles_count += 1
+            if tuple(target) not in all_targets:
+                all_targets[tuple(target)] = targets_count
+                targets_count += 1
+
             # convert SMILES to molecular representation using rdkit
             c_size, features, edge_index = smile_graph[smiles]
             # make the graph ready for PyTorch Geometrics GCN algorithms:
             GCNData = DATA.Data(x=torch.Tensor(features),
                                 edge_index=torch.LongTensor(edge_index).transpose(1, 0),
-                                y=torch.FloatTensor([labels]))
+                                y=torch.FloatTensor([labels]),
+                                smiles_idx=torch.FloatTensor([all_smiles[smiles]]),
+                                tgt_idx=torch.FloatTensor([all_targets[tuple(target)]]))
             GCNData.target = torch.LongTensor([target])
             GCNData.__setitem__('c_size', torch.LongTensor([c_size]))
             # append graph, label and target sequence to data list

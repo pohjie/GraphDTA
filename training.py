@@ -72,13 +72,13 @@ print('Epochs: ', NUM_EPOCHS)
 # Main program: iterate over different datasets
 for dataset in datasets:
     print('\nrunning on ', model_st + '_' + dataset )
-    processed_data_file_train = 'data/processed/' + dataset + '_train.pt'
-    processed_data_file_test = 'data/processed/' + dataset + '_test.pt'
+    processed_data_file_train = 'data/processed/' + dataset + '_cf_train.pt'
+    processed_data_file_test = 'data/processed/' + dataset + '_cf_test.pt'
     if ((not os.path.isfile(processed_data_file_train)) or (not os.path.isfile(processed_data_file_test))):
         print('please run create_data.py to prepare data in pytorch format!')
     else:
-        train_data = TestbedDataset(root='data', dataset=dataset+'_train')
-        test_data = TestbedDataset(root='data', dataset=dataset+'_test')
+        train_data = TestbedDataset(root='data', dataset=dataset+'_cf_train')
+        test_data = TestbedDataset(root='data', dataset=dataset+'_cf_test')
 
         # make data PyTorch mini-batch processing ready
         train_loader = DataLoader(train_data, batch_size=TRAIN_BATCH_SIZE, shuffle=True)
