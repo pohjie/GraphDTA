@@ -95,6 +95,7 @@ for dataset in datasets:
         model_file_name = 'model_' + model_st + '_' + dataset +  '.model'
         result_file_name = 'result_' + model_st + '_' + dataset +  '.csv'
         for epoch in range(NUM_EPOCHS):
+            # TODO: In the model, simply call drug_embeddings(indices) to get the respective vectors
             train(model, device, train_loader, optimizer, epoch+1)
             G,P = predicting(model, device, test_loader)
             ret = [rmse(G,P),mse(G,P),pearson(G,P),spearman(G,P),ci(G,P)]
