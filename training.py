@@ -84,7 +84,6 @@ for dataset in datasets:
         train_loader = DataLoader(train_data, batch_size=TRAIN_BATCH_SIZE, shuffle=True)
         test_loader = DataLoader(test_data, batch_size=TEST_BATCH_SIZE, shuffle=False)
 
-        pdb.set_trace()
         # training the model
         device = torch.device(cuda_name if torch.cuda.is_available() else "cpu")
         model = modeling().to(device)

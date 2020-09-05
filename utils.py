@@ -79,8 +79,8 @@ class TestbedDataset(InMemoryDataset):
             GCNData = DATA.Data(x=torch.Tensor(features),
                                 edge_index=torch.LongTensor(edge_index).transpose(1, 0),
                                 y=torch.FloatTensor([labels]),
-                                smiles_idx=torch.FloatTensor([all_smiles[smiles]]),
-                                tgt_idx=torch.FloatTensor([all_targets[tuple(target)]]))
+                                smiles_idx=torch.IntTensor([all_smiles[smiles]]),
+                                tgt_idx=torch.IntTensor([all_targets[tuple(target)]]))
             GCNData.target = torch.LongTensor([target])
             GCNData.__setitem__('c_size', torch.LongTensor([c_size]))
             # append graph, label and target sequence to data list
