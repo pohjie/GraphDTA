@@ -51,6 +51,10 @@ class TestbedDataset(InMemoryDataset):
     # XD - list of SMILES, XT: list of encoded target (categorical or one-hot),
     # Y: list of labels (i.e. affinity)
     # Return: PyTorch-Geometric format processed data
+    # TODO: Generate a xd2idx and xt2idx:
+    # e.g. use a set, check if xd[i]/xt[i] has been inserted into the set already
+    # if not, simply add xd2idx/xt2idx as attributes (like how I added the oxy_count)
+    # then during training, I can simply fetch the exact idx and retrieve it from the embedding matrix
     def process(self, xd, xt, y,smile_graph):
         assert (len(xd) == len(xt) and len(xt) == len(y)), "The three lists must be the same length!"
         data_list = []
