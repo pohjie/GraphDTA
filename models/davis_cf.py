@@ -13,15 +13,15 @@ class DavisCF(torch.nn.Module):
         super(DavisCF, self).__init__()
 
         # davis
-        self.smiles_emb = nn.Embedding(68, 128)
-        self.tgt_emb = nn.Embedding(379, 128)
+        self.smiles_emb = nn.Embedding(68, 256)
+        self.tgt_emb = nn.Embedding(379, 256)
 
         # kiba
         # self.smiles_emb = nn.Embedding(2068, 128)
         # self.tgt_emb = nn.Embedding(229, 128)
 
-        self.drop1 = nn.Dropout(0.1)
-        self.cf_fc1 = nn.Linear(256, 1024)
+        self.drop1 = nn.Dropout(0.2)
+        self.cf_fc1 = nn.Linear(512, 1024)
         self.cf_fc2 = nn.Linear(1024, 256)
 
 
@@ -72,7 +72,7 @@ class DavisCF(torch.nn.Module):
         embedded_tgt = self.tgt_emb(data.tgt_idx)
 
         # pass through 2 layers then concat with GNN output
-        cf_x = torch.cat([embedded_smiles, embedded_tgt], 1)
+        cf_x = torch.cat((embedded_smiles, embedded_tgt), 1)
         cf_x = F.relu(self.cf_fc1(cf_x))
         cf_x = self.drop1(cf_x)
         cf_x = F.relu(self.cf_fc2(cf_x))

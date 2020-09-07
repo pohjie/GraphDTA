@@ -17,11 +17,11 @@ class KibaCF(torch.nn.Module):
         # self.tgt_emb = nn.Embedding(379, 128)
 
         # kiba
-        self.smiles_emb = nn.Embedding(2068, 128)
-        self.tgt_emb = nn.Embedding(229, 128)
+        self.smiles_emb = nn.Embedding(2068, 256)
+        self.tgt_emb = nn.Embedding(229, 256)
 
         self.drop1 = nn.Dropout(0.1)
-        self.cf_fc1 = nn.Linear(256, 1024)
+        self.cf_fc1 = nn.Linear(512, 1024)
         self.cf_fc2 = nn.Linear(1024, 256)
 
 

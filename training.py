@@ -14,7 +14,7 @@ from models.ginprotembdouble import GINProtEmbDouble
 from models.directemb import DirectEmb
 from models.davis_cf import DavisCF
 from models.kiba_cf import KibaCF
-from models.cf import 
+from models.cf import CF
 from utils import *
 import time
 

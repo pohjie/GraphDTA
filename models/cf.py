@@ -13,18 +13,18 @@ class CF(torch.nn.Module):
         super(CF, self).__init__()
 
         # davis
-        self.smiles_emb = nn.Embedding(68, 128)
-        self.tgt_emb = nn.Embedding(379, 128)
+        self.smiles_emb = nn.Embedding(68, 256)
+        self.tgt_emb = nn.Embedding(379, 256)
 
         # kiba
         # self.smiles_emb = nn.Embedding(2068, 128)
         # self.tgt_emb = nn.Embedding(229, 128)
 
         self.drop1 = nn.Dropout(0.2)
-        self.cf_fc1 = nn.Linear(256, 1024)
-        self.cf_fc2 = nn.Linear(1024, 256)
+        self.cf_fc1 = nn.Linear(512, 256)
+        self.cf_fc2 = nn.Linear(256, 128)
 
-        self.out = nn.Linear(256, self.n_output)        # n_output = 1 for regression task
+        self.out = nn.Linear(128, n_output)        # n_output = 1 for regression task
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
