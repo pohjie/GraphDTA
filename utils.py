@@ -7,12 +7,10 @@ from torch_geometric.data import InMemoryDataset, DataLoader
 from torch_geometric import data as DATA
 import torch
 
-from numba import jit
-
 class TestbedDataset(InMemoryDataset):
     def __init__(self, root='/tmp', dataset='davis',
                  xd=None, xt=None, y=None, transform=None,
-                 pre_transform=None,smile_graph=None,oxy=None):
+                 pre_transform=None,smile_graph=None):
 
         #root is required for save preprocessed data, default is '/tmp'
         super(TestbedDataset, self).__init__(root, transform, pre_transform)
@@ -23,7 +21,7 @@ class TestbedDataset(InMemoryDataset):
             self.data, self.slices = torch.load(self.processed_paths[0])
         else:
             print('Pre-processed data {} not found, doing pre-processing...'.format(self.processed_paths[0]))
-            self.process(xd, xt, y,smile_graph, oxy)
+            self.process(xd, xt, y,smile_graph)
             self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
@@ -51,28 +49,46 @@ class TestbedDataset(InMemoryDataset):
     # XD - list of SMILES, XT: list of encoded target (categorical or one-hot),
     # Y: list of labels (i.e. affinity)
     # Return: PyTorch-Geometric format processed data
-    def process(self, xd, xt, y,smile_graph, oxy):
-        assert (len(xd) == len(xt) and len(xt) == len(y) and len(y) == len(oxy)), "The three lists must be the same length!"
+    def process(self, xd, xt, y,smile_graph):
+        assert (len(xd) == len(xt) and len(xt) == len(y) and len(y)), "The three lists must be the same length!"
         data_list = []
         data_len = len(xd)
+
+        smiles2idx = {}
+        smiles_ct = 0
+        tgt2idx = {}
+        tgt_ct = 0
+
         for i in range(data_len):
             print('Converting SMILES to graph: {}/{}'.format(i+1, data_len))
             smiles = xd[i]
             target = xt[i]
             labels = y[i]
-            count = oxy[i]
+
+            # makes sense to do a smiles2idx mapping here, then print the
+            # mapping and save it to some text file
+            if smiles not in smiles2idx:
+                smiles2idx[smiles] = smiles_ct
+                smiles_ct += 1
+            if target not in tgt2idx:
+                tgt2idx[target] = tgt_ct
+                tgt_ct += 1
+
             # convert SMILES to molecular representation using rdkit
             c_size, features, edge_index = smile_graph[smiles]
             # make the graph ready for PyTorch Geometrics GCN algorithms:
             GCNData = DATA.Data(x=torch.Tensor(features),
                                 edge_index=torch.LongTensor(edge_index).transpose(1, 0),
-                                y=torch.FloatTensor([labels]),
-                                c=torch.FloatTensor([count]))
+                                smiles_idx=torch.FloatTensor([smiles2idx[smiles]]),
+                                tgt_idx=torch.FloatTensor([tgt2idx[target]]),
+                                y=torch.FloatTensor([labels])),
             GCNData.target = torch.LongTensor([target])
             GCNData.__setitem__('c_size', torch.LongTensor([c_size]))
             # append graph, label and target sequence to data list
             data_list.append(GCNData)
 
+        print(smiles2idx, file=open(f'smiles2idx_{str(len(smiles2idx))}.txt', 'w'))
+        print(tgt2idx, file=open(f'tgt2idx_{str(len(tgt2idx))}.txt', 'w'))
         if self.pre_filter is not None:
             data_list = [data for data in data_list if self.pre_filter(data)]
 
@@ -110,7 +126,7 @@ def fast_reshape(batch, x, x_reshaped):
     return x_reshaped
 
 @jit(nopython=True) # Set "nopython" mode for best performance, equivalent to @njit
-def shapeback(output, batch, x): 
+def shapeback(output, batch, x):
     batch_size = batch.shape[0]
     count = np.zeros(batch_size, dtype=np.int8)
     for i in range(1, batch_size):

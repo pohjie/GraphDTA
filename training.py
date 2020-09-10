@@ -58,7 +58,7 @@ def predicting(model, device, loader):
 
 
 datasets = [['davis','kiba','kiba_small'][int(sys.argv[1])]]
-modeling = [AttnGCNNet, AttnGINProtEmb, AttnGC, AttnGINConvNet, 
+modeling = [AttnGINConvNet,
             GINConvNet, GATNet, GAT_GCN, GCNNet, GINProtEmb][int(sys.argv[2])]
 model_st = modeling.__name__
 

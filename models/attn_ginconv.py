@@ -75,33 +75,33 @@ class AttnGINConvNet(torch.nn.Module):
         target = data.target
 
         # skip connections
-        x = F.relu(self.conv1(x, edge_index))
-        x = self.bn1(x)
-        identity_x = x
-        x = F.relu(self.conv2(x, edge_index))
-        x = self.bn2(x)
-        # first skip connection
-        x += identity_x
-        x = F.relu(self.conv3(x, edge_index))
-        x = self.bn3(x)
-        identity_x = x
-        x = F.relu(self.conv4(x, edge_index))
-        x = self.bn4(x)
-        # second skip connection
-        x += identity_x
-        x = F.relu(self.conv5(x, edge_index))
-        x = self.bn5(x)
-
         # x = F.relu(self.conv1(x, edge_index))
         # x = self.bn1(x)
+        # identity_x = x
         # x = F.relu(self.conv2(x, edge_index))
         # x = self.bn2(x)
+        # first skip connection
+        # x += identity_x
         # x = F.relu(self.conv3(x, edge_index))
         # x = self.bn3(x)
+        # identity_x = x
         # x = F.relu(self.conv4(x, edge_index))
         # x = self.bn4(x)
+        # second skip connection
+        # x += identity_x
         # x = F.relu(self.conv5(x, edge_index))
         # x = self.bn5(x)
+
+        x = F.relu(self.conv1(x, edge_index))
+        x = self.bn1(x)
+        x = F.relu(self.conv2(x, edge_index))
+        x = self.bn2(x)
+        x = F.relu(self.conv3(x, edge_index))
+        x = self.bn3(x)
+        x = F.relu(self.conv4(x, edge_index))
+        x = self.bn4(x)
+        x = F.relu(self.conv5(x, edge_index))
+        x = self.bn5(x)
 
         embedded_xt = self.embedding_xt(target)
 
@@ -121,6 +121,7 @@ class AttnGINConvNet(torch.nn.Module):
         output, weights = self.attention(embedded_xt, x_reshaped.float()) # query, context
         conv_xt = self.conv_xt_1(output)
 
+        pdb.set_trace()
         # carry on with x (drug)
         x = global_add_pool(x, batch)
         x = F.relu(self.fc1_xd(x))

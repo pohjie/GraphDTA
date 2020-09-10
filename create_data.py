@@ -30,9 +30,9 @@ def one_of_k_encoding_unk(x, allowable_set):
 
 def smile_to_graph(smile):
     mol = Chem.MolFromSmiles(smile)
-    
+
     c_size = mol.GetNumAtoms()
-    
+
     features = []
     for atom in mol.GetAtoms():
         feature = atom_features(atom)
@@ -45,14 +45,14 @@ def smile_to_graph(smile):
     edge_index = []
     for e1, e2 in g.edges:
         edge_index.append([e1, e2])
-        
+
     return c_size, features, edge_index
 
 def seq_cat(prot):
     x = np.zeros(max_seq_len)
-    for i, ch in enumerate(prot[:max_seq_len]): 
+    for i, ch in enumerate(prot[:max_seq_len]):
         x[i] = seq_dict[ch]
-    return x  
+    return x
 
 
 # from DeepDTA data
@@ -79,7 +79,7 @@ for dataset in datasets:
     affinity = np.asarray(affinity)
     opts = ['train','test']
     for opt in opts:
-        rows, cols = np.where(np.isnan(affinity)==False)  
+        rows, cols = np.where(np.isnan(affinity)==False)
         if opt=='train':
             rows,cols = rows[train_fold], cols[train_fold]
         elif opt=='test':
@@ -91,14 +91,14 @@ for dataset in datasets:
                 ls += [ drugs[rows[pair_ind]]  ]
                 ls += [ prots[cols[pair_ind]]  ]
                 ls += [ affinity[rows[pair_ind],cols[pair_ind]]  ]
-                f.write(','.join(map(str,ls)) + '\n')       
+                f.write(','.join(map(str,ls)) + '\n')
     print('\ndataset:', dataset)
     print('train_fold:', len(train_fold))
     print('test_fold:', len(valid_fold))
     print('len(set(drugs)),len(set(prots)):', len(set(drugs)),len(set(prots)))
     all_prots += list(set(prots))
-    
-    
+
+
 seq_voc = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
 seq_dict = {v:i for i,v in enumerate(seq_voc)}
 seq_dict_len = len(seq_dict)
@@ -119,25 +119,23 @@ for smile in compound_iso_smiles:
 datasets = ['davis','kiba']
 # convert to PyTorch data format
 for dataset in datasets:
-    processed_data_file_train = 'data/processed/' + dataset + '_oxy_train.pt'
-    processed_data_file_test = 'data/processed/' + dataset + '_oxy_test.pt'
+    processed_data_file_train = 'data/processed/' + dataset + '_train.pt'
+    processed_data_file_test = 'data/processed/' + dataset + '_test.pt'
     if ((not os.path.isfile(processed_data_file_train)) or (not os.path.isfile(processed_data_file_test))):
         df = pd.read_csv('data/' + dataset + '_train.csv')
-        df['oxy'] = df.apply(lambda row: row.compound_iso_smiles.count('=O') + row.compound_iso_smiles.count('O='), axis = 1)
-        train_drugs, train_prots,  train_Y, train_oxy = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity']),list(df['oxy'])
+        train_drugs, train_prots,  train_Y = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity'])
         XT = [seq_cat(t) for t in train_prots]
-        train_drugs, train_prots,  train_Y, train_oxy = np.asarray(train_drugs), np.asarray(XT), np.asarray(train_Y), np.asarray(train_oxy)
+        train_drugs, train_prots,  train_Y = np.asarray(train_drugs), np.asarray(XT), np.asarray(train_Y)
         df = pd.read_csv('data/' + dataset + '_test.csv')
-        df['oxy'] = df.apply(lambda row: row.compound_iso_smiles.count('=O') + row.compound_iso_smiles.count('O='), axis = 1)
-        test_drugs, test_prots,  test_Y, test_oxy = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity']),list(df['oxy'])
+        test_drugs, test_prots,  test_Y = list(df['compound_iso_smiles']),list(df['target_sequence']),list(df['affinity'])
         XT = [seq_cat(t) for t in test_prots]
-        test_drugs, test_prots,  test_Y, test_oxy = np.asarray(test_drugs), np.asarray(XT), np.asarray(test_Y), np.asarray(test_oxy)
+        test_drugs, test_prots,  test_Y = np.asarray(test_drugs), np.asarray(XT), np.asarray(test_Y)
 
         # make data PyTorch Geometric ready
-        print('preparing ', dataset + '_oxy_train.pt in pytorch format!')
-        train_data = TestbedDataset(root='data', dataset=dataset+'_oxy_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph, oxy=train_oxy)
-        print('preparing ', dataset + '_oxy_test.pt in pytorch format!')
-        test_data = TestbedDataset(root='data', dataset=dataset+'_oxy_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph, oxy=test_oxy)
-        print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')        
+        print('preparing ', dataset + '_train.pt in pytorch format!')
+        train_data = TestbedDataset(root='data', dataset=dataset+'_train', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph)
+        print('preparing ', dataset + '_test.pt in pytorch format!')
+        test_data = TestbedDataset(root='data', dataset=dataset+'_test', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph)
+        print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')
     else:
-        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')      
+        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')
