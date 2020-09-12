@@ -6,6 +6,7 @@ from scipy import stats
 from torch_geometric.data import InMemoryDataset, DataLoader
 from torch_geometric import data as DATA
 import torch
+from numba import jit
 
 class TestbedDataset(InMemoryDataset):
     def __init__(self, root='/tmp', dataset='davis',
@@ -65,13 +66,14 @@ class TestbedDataset(InMemoryDataset):
             target = xt[i]
             labels = y[i]
 
+            tgt_tup = tuple(target)
             # makes sense to do a smiles2idx mapping here, then print the
             # mapping and save it to some text file
             if smiles not in smiles2idx:
                 smiles2idx[smiles] = smiles_ct
                 smiles_ct += 1
-            if target not in tgt2idx:
-                tgt2idx[target] = tgt_ct
+            if tgt_tup not in tgt2idx:
+                tgt2idx[tgt_tup] = tgt_ct
                 tgt_ct += 1
 
             # convert SMILES to molecular representation using rdkit
@@ -80,8 +82,8 @@ class TestbedDataset(InMemoryDataset):
             GCNData = DATA.Data(x=torch.Tensor(features),
                                 edge_index=torch.LongTensor(edge_index).transpose(1, 0),
                                 smiles_idx=torch.FloatTensor([smiles2idx[smiles]]),
-                                tgt_idx=torch.FloatTensor([tgt2idx[target]]),
-                                y=torch.FloatTensor([labels])),
+                                tgt_idx=torch.FloatTensor([tgt2idx[tgt_tup]]),
+                                y=torch.FloatTensor([labels]))
             GCNData.target = torch.LongTensor([target])
             GCNData.__setitem__('c_size', torch.LongTensor([c_size]))
             # append graph, label and target sequence to data list
@@ -89,6 +91,7 @@ class TestbedDataset(InMemoryDataset):
 
         print(smiles2idx, file=open(f'smiles2idx_{str(len(smiles2idx))}.txt', 'w'))
         print(tgt2idx, file=open(f'tgt2idx_{str(len(tgt2idx))}.txt', 'w'))
+
         if self.pre_filter is not None:
             data_list = [data for data in data_list if self.pre_filter(data)]
 
