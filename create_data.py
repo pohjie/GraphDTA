@@ -30,6 +30,15 @@ col18 = {'He'}
 periodic_table = [col1, col2, col4, col5, col6, col7, col8, col9, col10, col11, col12, col13, col14,
                   col15, col16, col17, col18]
 
+ionisation_energy = {'C':11.2603, 'N':14.5341, 'O':13.6181, 'S':100.36, 'F':17.4228, 'Si':8.1517,
+                     'P':10.4867, 'Cl':12.9676, 'Br':11.8138, 'Mg':7.6462, 'Na':5.1391, 'Ca':6.1132,
+                     'Fe':7.9024, 'As':9.8152, 'Al':5.9858, 'I':10.4513, 'B':8.298, 'V':6.7463, 
+                     'K':4.3407, 'Tl':6.1083, 'Yb':6.2542, 'Sb':8.64, 'Sn':7.3438, 'Ag':7.5762,
+                     'Pd':8.3369, 'Co':7.881, 'Se':9.7524, 'Ti':6.8282, 'Zn':9.3941, 'H':13.5984,
+                     'Li':5.3917, 'Ge':7.9, 'Cu':7.7264, 'Au':9.2257, 'Ni':7.6398, 'Cd':8.9937,
+                     'In':5.7864, 'Mn':7.434, 'Zn':7.434, 'Cr':6.7666, 'Pt':9, 'Hg':10.4375, 'Pb':7.4167,
+                     'Unknown':0}
+
 def atom_features(atom):
     return np.array(one_of_k_encoding_unk(atom.GetSymbol(),['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na','Ca', 'Fe', 'As', 'Al', 'I', 'B', 'V', 'K', 'Tl', 'Yb','Sb', 'Sn', 'Ag', 'Pd', 'Co', 'Se', 'Ti', 'Zn', 'H','Li', 'Ge', 'Cu', 'Au', 'Ni', 'Cd', 'In', 'Mn', 'Zr','Cr', 'Pt', 'Hg', 'Pb', 'Unknown']) +
                     one_of_k_encoding(atom.GetDegree(), [0, 1, 2, 3, 4, 5, 6,7,8,9,10]) +
