@@ -10,6 +10,26 @@ from utils import *
 
 import pdb
 
+col1 = {'H', 'Li', 'Na', 'K'}
+col2 = {'Mg', 'Ca'}
+col4 = {'Ti', 'Zr'}
+col5 = {'V'}
+col6 = {'Cr'}
+col7 = {'Mn'}
+col8 = {'Fe'}
+col9 = {'Co'}
+col10 = {'Ni', 'Pd', 'Pt'}
+col11 = {'Cu', 'Ag', 'Au'}
+col12 = {'Zn', 'Cd', 'Hg'}
+col13 = {'Al', 'In', 'Tl'}
+col14 = {'C', 'Si', 'Ge', 'Sn', 'Pb'}
+col15 = {'N', 'P', 'As', 'Sb'}
+col16 = {'O', 'S', 'Se'}
+col17 = {'F', 'Cl', 'Br', 'I'}
+col18 = {'He'}
+periodic_table = [col1, col2, col4, col5, col6, col7, col8, col9, col10, col11, col12, col13, col14,
+                  col15, col16, col17, col18]
+
 def atom_features(atom):
     return np.array(one_of_k_encoding_unk(atom.GetSymbol(),['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na','Ca', 'Fe', 'As', 'Al', 'I', 'B', 'V', 'K', 'Tl', 'Yb','Sb', 'Sn', 'Ag', 'Pd', 'Co', 'Se', 'Ti', 'Zn', 'H','Li', 'Ge', 'Cu', 'Au', 'Ni', 'Cd', 'In', 'Mn', 'Zr','Cr', 'Pt', 'Hg', 'Pb', 'Unknown']) +
                     one_of_k_encoding(atom.GetDegree(), [0, 1, 2, 3, 4, 5, 6,7,8,9,10]) +
@@ -27,6 +47,16 @@ def one_of_k_encoding_unk(x, allowable_set):
     if x not in allowable_set:
         x = allowable_set[-1]
     return list(map(lambda s: x == s, allowable_set))
+
+def one_of_k_encoding_sets(x, allowable_set):
+    idx = -1
+    for i in range(len(periodic_table)):
+        if x in periodic_table[i]:
+            idx = i
+
+    encoding = [0] * (len(periodic_table) + 1)
+    encoding[idx] = 1
+    return encoding
 
 def smile_to_graph(smile):
     mol = Chem.MolFromSmiles(smile)
