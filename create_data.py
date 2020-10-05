@@ -39,12 +39,46 @@ ionisation_energy = {'C':11.2603, 'N':14.5341, 'O':13.6181, 'S':100.36, 'F':17.4
                      'In':5.7864, 'Mn':7.434, 'Zn':7.434, 'Cr':6.7666, 'Pt':9, 'Hg':10.4375, 'Pb':7.4167,
                      'Unknown':0}
 
+ionisation_sum = 0
+for e in ionisation_energy:
+    ionisation_sum += ionisation_energy[e]
+
+electronegativity = {'C':2.55, 'N':3.04, 'O':3.44, 'S':2.58, 'F':3.98, 'Si':1.9,
+                     'P':2.19, 'Cl':3.16, 'Br':2.96, 'Mg':1.31, 'Na':0.93, 'Ca':1.0,
+                     'Fe':1.83, 'As':2.18, 'Al':1.61, 'I':2.66, 'B':2.04, 'V':1.63, 
+                     'K':0.82, 'Tl':1.62, 'Yb':0, 'Sb':2.05, 'Sn':1.96, 'Ag':1.93,
+                     'Pd':2.2, 'Co':1.88, 'Se':2.55, 'Ti':1.54, 'Zn':1.65, 'H':2.2,
+                     'Li':0.98, 'Ge':2.01, 'Cu':1.9, 'Au':2.58, 'Ni':1.91, 'Cd':1.69,
+                     'In':1.78, 'Mn':1.55, 'Zn':1.65, 'Cr':1.66, 'Pt':2.28, 'Hg':2, 'Pb':2.33,
+                     'Unknown':0}
+
+electronegativity_sum = 0
+for e in electronegativity:
+    electronegativity_sum += electronegativity[e]
+
+atomic_radius = {'C':69, 'N':71, 'O':66, 'S':2.58, 'F':64, 'Si':111,
+                 'P':107, 'Cl':102, 'Br':120, 'Mg':141, 'Na':166, 'Ca':176,
+                 'Fe':132, 'As':119, 'Al':121, 'I':139, 'B':84, 'V':153, 
+                 'K':203, 'Tl':145, 'Yb':187, 'Sb':139, 'Sn':139, 'Ag':144,
+                 'Pd':139, 'Co':126, 'Se':120, 'Ti':160, 'Zn':122, 'H':31,
+                 'Li':121, 'Ge':122, 'Cu':132, 'Au':136, 'Ni':124, 'Cd':144,
+                 'In':142, 'Mn':139, 'Zn':122, 'Cr':139, 'Pt':136, 'Hg':132, 'Pb':146,
+                 'Unknown':0}
+
+atomic_r_sum = 0
+for r in atomic_radius:
+    atomic_r_sum += atomic_radius[r]
+
 def atom_features(atom):
     return np.array(one_of_k_encoding_unk(atom.GetSymbol(),['C', 'N', 'O', 'S', 'F', 'Si', 'P', 'Cl', 'Br', 'Mg', 'Na','Ca', 'Fe', 'As', 'Al', 'I', 'B', 'V', 'K', 'Tl', 'Yb','Sb', 'Sn', 'Ag', 'Pd', 'Co', 'Se', 'Ti', 'Zn', 'H','Li', 'Ge', 'Cu', 'Au', 'Ni', 'Cd', 'In', 'Mn', 'Zr','Cr', 'Pt', 'Hg', 'Pb', 'Unknown']) +
                     one_of_k_encoding(atom.GetDegree(), [0, 1, 2, 3, 4, 5, 6,7,8,9,10]) +
                     one_of_k_encoding_unk(atom.GetTotalNumHs(), [0, 1, 2, 3, 4, 5, 6,7,8,9,10]) +
                     one_of_k_encoding_unk(atom.GetImplicitValence(), [0, 1, 2, 3, 4, 5, 6,7,8,9,10]) +
-                    [atom.GetIsAromatic()])
+                    [atom.GetIsAromatic()] +
+                    one_of_k_encoding_sets(atom.GetSymbol(), periodic_table) +
+                    [ionisation_energy[atom.GetSymbol()]/ionisation_sum] +
+                    [electronegativity[atom.GetSymbol()]/electronegativity_sum] +
+                    [atomic_radius[atom.GetSymbol()]/atomic_r_sum])
 
 def one_of_k_encoding(x, allowable_set):
     if x not in allowable_set:
