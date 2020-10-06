@@ -32,7 +32,7 @@ periodic_table = [col1, col2, col4, col5, col6, col7, col8, col9, col10, col11, 
 
 ionisation_energy = {'C':11.2603, 'N':14.5341, 'O':13.6181, 'S':100.36, 'F':17.4228, 'Si':8.1517,
                      'P':10.4867, 'Cl':12.9676, 'Br':11.8138, 'Mg':7.6462, 'Na':5.1391, 'Ca':6.1132,
-                     'Fe':7.9024, 'As':9.8152, 'Al':5.9858, 'I':10.4513, 'B':8.298, 'V':6.7463, 
+                     'Fe':7.9024, 'As':9.8152, 'Al':5.9858, 'I':10.4513, 'B':8.298, 'V':6.7463,
                      'K':4.3407, 'Tl':6.1083, 'Yb':6.2542, 'Sb':8.64, 'Sn':7.3438, 'Ag':7.5762,
                      'Pd':8.3369, 'Co':7.881, 'Se':9.7524, 'Ti':6.8282, 'Zn':9.3941, 'H':13.5984,
                      'Li':5.3917, 'Ge':7.9, 'Cu':7.7264, 'Au':9.2257, 'Ni':7.6398, 'Cd':8.9937,
@@ -45,7 +45,7 @@ for e in ionisation_energy:
 
 electronegativity = {'C':2.55, 'N':3.04, 'O':3.44, 'S':2.58, 'F':3.98, 'Si':1.9,
                      'P':2.19, 'Cl':3.16, 'Br':2.96, 'Mg':1.31, 'Na':0.93, 'Ca':1.0,
-                     'Fe':1.83, 'As':2.18, 'Al':1.61, 'I':2.66, 'B':2.04, 'V':1.63, 
+                     'Fe':1.83, 'As':2.18, 'Al':1.61, 'I':2.66, 'B':2.04, 'V':1.63,
                      'K':0.82, 'Tl':1.62, 'Yb':0, 'Sb':2.05, 'Sn':1.96, 'Ag':1.93,
                      'Pd':2.2, 'Co':1.88, 'Se':2.55, 'Ti':1.54, 'Zn':1.65, 'H':2.2,
                      'Li':0.98, 'Ge':2.01, 'Cu':1.9, 'Au':2.58, 'Ni':1.91, 'Cd':1.69,
@@ -58,7 +58,7 @@ for e in electronegativity:
 
 atomic_radius = {'C':69, 'N':71, 'O':66, 'S':2.58, 'F':64, 'Si':111,
                  'P':107, 'Cl':102, 'Br':120, 'Mg':141, 'Na':166, 'Ca':176,
-                 'Fe':132, 'As':119, 'Al':121, 'I':139, 'B':84, 'V':153, 
+                 'Fe':132, 'As':119, 'Al':121, 'I':139, 'B':84, 'V':153,
                  'K':203, 'Tl':145, 'Yb':187, 'Sb':139, 'Sn':139, 'Ag':144,
                  'Pd':139, 'Co':126, 'Se':120, 'Ti':160, 'Zn':122, 'H':31,
                  'Li':121, 'Ge':122, 'Cu':132, 'Au':136, 'Ni':124, 'Cd':144,
@@ -103,13 +103,12 @@ def one_of_k_encoding_sets(x, allowable_set):
 
 def smile_to_graph(smile):
     mol = Chem.MolFromSmiles(smile)
-    
+
     c_size = mol.GetNumAtoms()
-    
+
     features = []
     for atom in mol.GetAtoms():
         feature = atom_features(atom)
-        pdb.set_trace()
         features.append( feature / sum(feature) )
 
     edges = []
@@ -119,14 +118,14 @@ def smile_to_graph(smile):
     edge_index = []
     for e1, e2 in g.edges:
         edge_index.append([e1, e2])
-        
+
     return c_size, features, edge_index
 
 def seq_cat(prot):
     x = np.zeros(max_seq_len)
-    for i, ch in enumerate(prot[:max_seq_len]): 
+    for i, ch in enumerate(prot[:max_seq_len]):
         x[i] = seq_dict[ch]
-    return x  
+    return x
 
 
 # from DeepDTA data
@@ -153,7 +152,7 @@ for dataset in datasets:
     affinity = np.asarray(affinity)
     opts = ['train','test']
     for opt in opts:
-        rows, cols = np.where(np.isnan(affinity)==False)  
+        rows, cols = np.where(np.isnan(affinity)==False)
         if opt=='train':
             rows,cols = rows[train_fold], cols[train_fold]
         elif opt=='test':
@@ -165,14 +164,14 @@ for dataset in datasets:
                 ls += [ drugs[rows[pair_ind]]  ]
                 ls += [ prots[cols[pair_ind]]  ]
                 ls += [ affinity[rows[pair_ind],cols[pair_ind]]  ]
-                f.write(','.join(map(str,ls)) + '\n')       
+                f.write(','.join(map(str,ls)) + '\n')
     print('\ndataset:', dataset)
     print('train_fold:', len(train_fold))
     print('test_fold:', len(valid_fold))
     print('len(set(drugs)),len(set(prots)):', len(set(drugs)),len(set(prots)))
     all_prots += list(set(prots))
-    
-    
+
+
 seq_voc = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
 seq_dict = {v:i for i,v in enumerate(seq_voc)}
 seq_dict_len = len(seq_dict)
@@ -210,6 +209,6 @@ for dataset in datasets:
         train_data = TestbedDataset(root='data', dataset=dataset+'_train_f', xd=train_drugs, xt=train_prots, y=train_Y,smile_graph=smile_graph)
         print('preparing ', dataset + '_test.pt in pytorch format!')
         test_data = TestbedDataset(root='data', dataset=dataset+'_test_f', xd=test_drugs, xt=test_prots, y=test_Y,smile_graph=smile_graph)
-        print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')        
+        print(processed_data_file_train, ' and ', processed_data_file_test, ' have been created')
     else:
-        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')      
+        print(processed_data_file_train, ' and ', processed_data_file_test, ' are already created')
