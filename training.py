@@ -91,6 +91,7 @@ for dataset in datasets:
         optimizer = torch.optim.Adam(model.parameters(), lr=LR)
         best_mse = 1000
         best_ci = 0
+        overall_ci = 0
         best_epoch = -1
         model_file_name = 'model_' + model_st + '_' + dataset +  '.model'
         result_file_name = 'result_' + model_st + '_' + dataset +  '.csv'
@@ -98,7 +99,8 @@ for dataset in datasets:
             train(model, device, train_loader, optimizer, epoch+1)
             G,P = predicting(model, device, test_loader)
             ret = [rmse(G,P),mse(G,P),pearson(G,P),spearman(G,P),ci(G,P)]
-            print('mse here is: ', ret[1], '; ci here is: ', ret[-1])
+            overall_ci = max(overall_ci, ret[-1])
+            print('mse here is: ', ret[1], '; ci here is: ', ret[-1], '; overall_ci is: ', overall_ci)
             if ret[1]<best_mse:
                 torch.save(model.state_dict(), model_file_name)
                 with open(result_file_name,'w') as f:
